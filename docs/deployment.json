@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 2,
+  "services": [
+    {
+      "name": "inspection-api",
+      "description": "设备巡检记录服务：巡检员提交巡检结果、管理人员按设备查询历史巡检记录（HTTP JSON API）",
+      "build": {
+        "context": ".",
+        "file": "Dockerfile"
+      },
+      "port": 8080,
+      "healthPath": "/healthz",
+      "exposed": true
+    }
+  ],
+  "operations": {
+    "errorLogRules": [
+      {
+        "name": "app-error-log",
+        "type": "structured",
+        "field": "level",
+        "values": ["error", "fatal"],
+        "messageField": "msg",
+        "severity": "high"
+      },
+      {
+        "name": "node-uncaught-error",
+        "type": "pattern",
+        "pattern": "^(?<message>(?:[A-Z][A-Za-z]*)?Error(?: \\[[A-Z_]+\\])?: .{0,200})",
+        "severity": "high"
+      }
+    ]
+  }
+}

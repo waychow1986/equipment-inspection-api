@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 3,
+  "dependencies": [
+    {
+      "name": "inspection-db",
+      "kind": "postgresql",
+      "purpose": "持久保存巡检记录（只增不改）与访问令牌登记表（只存令牌摘要），保证服务重启或重新部署后已提交的记录仍可查询（FR-001、FR-021、FR-022、FR-027、AC-07）。服务启动时在 schema `inspection` 中自动执行迁移。",
+      "recommendation": {
+        "form": "container",
+        "reason": "新项目没有技术基线与客户偏好记录；数据量小、单库即可满足；开源 PostgreSQL 由平台以容器运行并挂持久卷即可满足 AC-07，无需云资源 IaC。生产如需托管备份，可在依赖与机密任务中改为客户提供的托管 PostgreSQL（需 TLS 时把 sslmode 设为 require 或 verify-full）。"
+      },
+      "constraints": {
+        "server-version": "PostgreSQL 服务器版本不低于 14（使用 identity 列、clock_timestamp 与 sha256 等能力）",
+        "schema-privileges": "连接用户能在所连数据库中创建 schema `inspection`，或该 schema 已存在且用户对其拥有 CREATE 与 USAGE 权限（服务启动时执行迁移）"
+      },
+      "realInstance": {
+        "dev": true,
+        "test": true
+      },
+      "access": {
+        "fields": [
+          {
+            "name": "address",
+            "purpose": "PostgreSQL 服务器地址，主机名:端口",
+            "target": true,
+            "example": "db-host.example:5432"
+          },
+          {
+            "name": "database",
+            "purpose": "服务使用的数据库名",
+            "example": "inspection"
+          },
+          {
+            "name": "username",
+            "purpose": "连接数据库的用户名",
+            "example": "inspection_app"
+          },
+          {
+            "name": "password",
+            "purpose": "连接数据库的密码",
+            "secret": true
+          },
+          {
+            "name": "sslmode",
+            "purpose": "数据库连接的 TLS 模式：disable（集群内容器）、require 或 verify-full（托管实例）",
+            "example": "disable"
+          }
+        ]
+      },
+      "probe": {
+        "path": "deploy/probes/inspection-db.sh"
+      },
+      "container": {
+        "image": "postgres:16-alpine",
+        "ports": [
+          {
+            "name": "pg",
+            "port": 5432
+          }
+        ],
+        "health": {
+          "port": "pg"
+        },
+        "env": {
+          "POSTGRES_USER": "inspection",
+          "POSTGRES_DB": "inspection",
+          "POSTGRES_PASSWORD": "{{secret.db-password}}",
+          "PGDATA": "/var/lib/postgresql/data/pgdata"
+        },
+        "generatedSecrets": [
+          "db-password"
+        ],
+        "storage": {
+          "path": "/var/lib/postgresql/data",
+          "sizeGi": 2
+        },
+        "connection": {
+          "address": "{{host}}:{{port.pg}}",
+          "database": "inspection",
+          "username": "inspection",
+          "password": "{{secret.db-password}}",
+          "sslmode": "disable"
+        }
+      },
+      "sharing": {
+        "description": "复用其他项目的 PostgreSQL 实例时，为本项目单独建立数据库与登录用户（例如数据库 inspection_<项目>、用户 inspection_<项目>），该用户只对本数据库拥有 CONNECT/CREATE 权限，不授予其他数据库的任何权限；服务只使用其中的 schema `inspection`。不要与其他项目共用数据库或用户。"
+      }
+    }
+  ],
+  "secrets": [
+    {
+      "name": "QA_INSPECTOR_1_TOKEN",
+      "purpose": "独立测试用巡检员令牌 I1（规格验收场景的测试身份）；≥32 个字符的高熵随机串。独立测试只把其 SHA-256 摘要登记到 test 实例的令牌登记表，不写出原文。",
+      "environments": ["test"],
+      "required": true
+    },
+    {
+      "name": "QA_INSPECTOR_2_TOKEN",
+      "purpose": "独立测试用巡检员令牌 I2（IQA-004、IQA-021 中被收回的令牌）；≥32 个字符的高熵随机串，与其他测试令牌不同。",
+      "environments": ["test"],
+      "required": true
+    },
+    {
+      "name": "QA_MANAGER_TOKEN",
+      "purpose": "独立测试用管理人员令牌 M1；≥32 个字符的高熵随机串，与其他测试令牌不同。",
+      "environments": ["test"],
+      "required": true
+    },
+    {
+      "name": "QA_INVALID_TOKEN",
+      "purpose": "独立测试用无效令牌 X（不会被登记，用于验证未识别身份被拒绝）；≥32 个字符的随机串，与其他测试令牌不同。",
+      "environments": ["test"],
+      "required": true
+    }
+  ]
+}
