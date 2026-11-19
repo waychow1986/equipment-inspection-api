@@ -1,0 +1,10 @@
+{
+  "deliveryId": "DLV-20261119-9A30C99046E5",
+  "title": "设备巡检记录服务",
+  "requirement": "做一个后端服务：门店的巡检员能提交每台设备的巡检结果，管理人员能查到某台设备的历史巡检记录。",
+  "note": "做一个后端服务：门店的巡检员能提交每台设备的巡检结果，管理人员能查到某台设备的历史巡检记录。",
+  "materials": [ ],
+  "scope": null,
+  "changeRequest": null,
+  "requestedBy": "e2e-delegate"
+}
