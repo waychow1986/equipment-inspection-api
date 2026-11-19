@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S36",
+  "result": "done",
+  "summary": "首次审查第 1 批（S35：提交接口、认证、令牌清单、白名单日志、迁移与写入角色、健康检查与 OpenAPI）：未发现阻断问题；认证判定顺序、最小权限写入角色、只追加触发器、日志白名单与错误摘要均与技术方案一致，AC-01、AC-06、AC-08 有真实 PostgreSQL 与真实进程的测试覆盖（含日志全文零命中检查），未发现修改或放宽测试；记录 3 条非阻断观察项。",
+  "asks": [],
+  "outputs": [],
+  "review": {
+    "mode": "code-review",
+    "conclusion": "通过（无阻断问题）。第 1 批改动符合已确认意图、规格与技术方案（TD-003/004/005/008/010/013/014、日志隐私、错误模型）；身份 401→403→400 在 onRequest 钩子中先于请求体处理；任何拒绝都不触达 INSERT（AC-06）；201 在单条自动提交的 INSERT 返回后才发出（AC-01）；日志经 formatters.log 字段白名单与错误摘要（只含 errName/errCode）输出，配置错误只记录变量名、条目序号与原因代码，功能测试在 debug 级别下对服务全部输出检索令牌、摘要、持有人、设备/门店/备注标记、记录标识与数据库密码零命中（AC-08）。已锁定的 tasks-qa.md、qa-run.sh 及 docs/、deploy/ 未被本批修改；仓库与 README 中没有凭据。镜像构建未在本地验证（环境无 Docker 守护进程，由平台构建），属下游证据，不构成问题。",
+    "items": [],
+    "findings": [
+      {
+        "ownerStep": "S35",
+        "text": "【观察·稳定性】src/db/migrate.ts:96-104 ensureWriterRole 以自动提交逐条执行 REVOKE ALL ON inspection_record … FROM <writer> 再 GRANT SELECT, INSERT。每次启动都会重放；在受控重新部署（例如收回令牌时，技术方案“令牌变更的发布”）期间，旧进程仍以同一写入角色处理请求，若其 INSERT 恰好落在 REVOKE 与 GRANT 之间，会得到 42501 并返回 500（不产生记录，调用方可重试，因此不构成数据丢失，不阻断）。建议把 REVOKE/GRANT 放在同一事务中（PostgreSQL 的授权变更是事务性的），使权限对并发会话原子切换。",
+        "blocking": false
+      },
+      {
+        "ownerStep": "S35",
+        "text": "【观察·输入校验】src/inspections/validation.ts:31-56、69-79 未拒绝包含 \\u0000 的 deviceId/storeId/note。JSON 允许该转义，校验通过后 PostgreSQL text 列拒绝 NUL（SQLSTATE 22021），走 app.ts 错误处理器返回 500 INTERNAL_ERROR 并记一条 error 日志（只含 errName/errCode，无内容泄露，也不产生记录）。按技术方案“输入不符合要求”应为 400；建议在校验中把含 NUL（或控制字符）的取值判为 INVALID_VALUE。不影响 AC-01/AC-06 的已批准场景，不阻断。",
+        "blocking": false
+      },
+      {
+        "ownerStep": "S35",
+        "text": "【观察·契约一致性】src/inspections/validation.ts:64 对 conclusion 也执行了去除首尾空白（经 requiredString），因此 \" NORMAL \" 会被接受为 NORMAL；技术方案“输入规范化规则”只对 deviceId、storeId、note 与查询参数去空白，契约写明 conclusion“只接受 NORMAL 或 ABNORMAL”。行为宽松但不产生错误数据，不阻断；建议与方案对齐（不去空白），或在方案中明确该宽松处理。",
+        "blocking": false
+      }
+    ]
+  }
+}
