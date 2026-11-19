@@ -7,7 +7,7 @@
       "purpose": "持久保存巡检记录（只增不改），保证服务重启或重新部署后已提交的记录仍可查询（FR-001、FR-021、FR-022、AC-07）。服务启动时以连接用户（所有者）在 schema `inspection` 中执行迁移，并创建只具备巡检记录 INSERT/SELECT 权限的写入角色 `<数据库名>_inspection_writer`；处理请求的会话切换到该角色（最小权限）。访问令牌不保存在数据库中。",
       "recommendation": {
         "form": "container",
-        "reason": "新项目没有技术基线与客户偏好记录；数据量小、单库即可满足；开源 PostgreSQL 由平台以容器运行并挂持久卷即可满足 AC-07，无需云资源 IaC。生产如需托管备份，可在依赖与机密任务中改为客户提供的托管 PostgreSQL（需 TLS 时把 sslmode 设为 require 或 verify-full）。"
+        "reason": "新项目没有技术基线与客户偏好记录；数据量小、单库即可满足；开源 PostgreSQL 由平台以容器运行并挂持久卷即可满足 AC-07，无需云资源 IaC。生产如需托管备份，可在依赖与机密任务中改为客户提供的托管 PostgreSQL（需 TLS 时把接入字段 SSLMODE 设为 require 或 verify-full）。"
       },
       "constraints": {
         "server-version": "PostgreSQL 服务器版本不低于 14（使用 identity 列、clock_timestamp 与 sha256 等能力）",
@@ -21,28 +21,28 @@
       "access": {
         "fields": [
           {
-            "name": "address",
+            "name": "ADDRESS",
             "purpose": "PostgreSQL 服务器地址，主机名:端口",
             "target": true,
             "example": "db-host.example:5432"
           },
           {
-            "name": "database",
+            "name": "DATABASE",
             "purpose": "服务使用的数据库名",
             "example": "inspection"
           },
           {
-            "name": "username",
+            "name": "USERNAME",
             "purpose": "连接数据库的用户名",
             "example": "inspection_app"
           },
           {
-            "name": "password",
+            "name": "PASSWORD",
             "purpose": "连接数据库的密码",
             "secret": true
           },
           {
-            "name": "sslmode",
+            "name": "SSLMODE",
             "purpose": "数据库连接的 TLS 模式：disable（集群内容器）、require 或 verify-full（托管实例）",
             "example": "disable"
           }
@@ -65,11 +65,11 @@
         "env": {
           "POSTGRES_USER": "inspection",
           "POSTGRES_DB": "inspection",
-          "POSTGRES_PASSWORD": "{{secret.db-password}}",
+          "POSTGRES_PASSWORD": "{{secret.DB_PASSWORD}}",
           "PGDATA": "/var/lib/postgresql/data/pgdata"
         },
         "generatedSecrets": [
-          "db-password"
+          "DB_PASSWORD"
         ],
         "storage": {
           "path": "/var/lib/postgresql/data",
@@ -80,11 +80,11 @@
           "group": 70
         },
         "connection": {
-          "address": "{{host}}:{{port.pg}}",
-          "database": "inspection",
-          "username": "inspection",
-          "password": "{{secret.db-password}}",
-          "sslmode": "disable"
+          "ADDRESS": "{{host}}:{{port.pg}}",
+          "DATABASE": "inspection",
+          "USERNAME": "inspection",
+          "PASSWORD": "{{secret.DB_PASSWORD}}",
+          "SSLMODE": "disable"
         }
       },
       "sharing": {

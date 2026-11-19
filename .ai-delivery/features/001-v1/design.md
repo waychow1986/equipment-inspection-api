@@ -9,6 +9,7 @@
 > ③ 数据库按最小权限拆分：迁移使用依赖注入的所有者账号；处理请求的会话切换到只具备 `inspection_record` INSERT/SELECT 权限的写入角色；TD-003 的表述改为准确说法。
 > ④ 不声明候选服务日志的导出地址；IQA-019 在独立测试中记为测试缺口，AC-08 以开发者侧对真实进程完整输出的零命中检查作为证据，由 G4 判断。
 > ⑤ Runbook 与 README 写明运维登记、收回令牌的步骤。
+> ⑥ 依赖绑定前检查（S30 门禁反馈）：`docs/dependencies.json` 的接入字段改为大写名称 `ADDRESS`、`DATABASE`、`USERNAME`、`PASSWORD`、`SSLMODE`（与注入的环境变量后缀一致，应用读取的 `AIDH_DEP_INSPECTION_DB_*` 不变），平台生成的机密改名为 `DB_PASSWORD`，容器变量与连接模板中的占位同步改为 `{{secret.DB_PASSWORD}}`。
 > 其余内容（技术栈、数据模型中的巡检记录表、错误模型、日志白名单、部署形态）与上一版相同。
 
 ## 技术上下文（Technical Context）
@@ -345,6 +346,7 @@ Coding 会创建或修改的路径（写路径清单）：
 - 镜像 `postgres:16-alpine` 默认以 root 启动入口脚本，平台不以 root 运行依赖容器，因此 `runAs` 写出镜像中已有的 `postgres` 用户：UID 70、GID 70（Alpine 版官方镜像固定的数值）。以该用户直接启动时，入口脚本跳过切换用户与 `chown`，直接以 UID 70 执行 `initdb` 与 `postgres`；`/var/run/postgresql` 在镜像中已对所有用户可写。
 - 持久卷挂载在 `/var/lib/postgresql/data`，其根目录经 `fsGroup` 对 GID 70 可写但属主不是 UID 70；`initdb` 要求数据目录属主为自己且权限 0700，所以数据目录 `PGDATA` 设为挂载路径下的子目录 `/var/lib/postgresql/data/pgdata`，由入口脚本以 UID 70 创建。
 - `POSTGRES_USER=inspection` 为该实例的超级用户，满足 `schema-privileges` 与 `role-privileges`；服务处理请求时不使用它的权限，而是切换到写入角色（TD-013）。
+- 数据库密码由平台按 `generatedSecrets: [DB_PASSWORD]` 生成，经 `POSTGRES_PASSWORD={{secret.DB_PASSWORD}}` 设给容器，并经连接模板的 `PASSWORD` 字段注入为 `AIDH_DEP_INSPECTION_DB_PASSWORD`；连接模板的键 `ADDRESS`、`DATABASE`、`USERNAME`、`PASSWORD`、`SSLMODE` 与接入字段名称完全一致。
 - 健康检查为 `pg` 端口（5432）的 TCP 检查；初始化完成、服务器监听后即通过。
 
 ## 安全、隐私、身份与 Secret
@@ -365,7 +367,7 @@ Coding 会创建或修改的路径（写路径清单）：
 
 | Secret | 来源 | 进入应用的方式 | 保护措施 |
 |---|---|---|---|
-| 数据库密码（所有者） | 平台为容器生成（`generatedSecrets: db-password`）或客户提供 | `AIDH_DEP_INSPECTION_DB_PASSWORD`（机密来源注入） | 只在建立连接时使用；不记录、不回显；配置错误信息只写变量名 |
+| 数据库密码（所有者） | 平台为容器生成（`generatedSecrets: DB_PASSWORD`，接入字段 `PASSWORD`）或客户提供 | `AIDH_DEP_INSPECTION_DB_PASSWORD`（机密来源注入） | 只在建立连接时使用；不记录、不回显；配置错误信息只写变量名 |
 | 令牌清单 `INSPECTION_ACCESS_TOKENS` | 运维在项目机密中提供（按环境分别提供；本交付的验证只需要 `test` 值） | `AIDH_SECRET_INSPECTION_ACCESS_TOKENS` | 只含摘要、持有人、角色；启动时解析后只保留查找表；整体与条目内容都不记录（FR-023“机密配置的内容”） |
 | 访问令牌明文 | 运维生成后经安全渠道交给持有人 | 调用方的 `Authorization` 头 | 服务从不保存；日志、响应、错误中都不出现 |
 | 测试令牌 I1、I2、M1、X 与持有人标识 | 项目机密 `QA_INSPECTOR_1_TOKEN`、`QA_INSPECTOR_2_TOKEN`、`QA_MANAGER_TOKEN`、`QA_INVALID_TOKEN`、`QA_INSPECTOR_1_HOLDER`、`QA_INSPECTOR_2_HOLDER`（仅 `test`） | 独立测试环境的 `AIDH_SECRET_*` | 服务不读取这些变量；`INSPECTION_ACCESS_TOKENS` 的 `test` 值必须登记 I1、I2、M1 的摘要（见“独立测试需要的环境条件”）；脚本与证据中不写令牌原文 |

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S22",
+  "result": "done",
+  "summary": "按 S30 依赖绑定前检查的反馈修订依赖声明：inspection-db 的接入字段与连接模板键改为大写 ADDRESS/DATABASE/USERNAME/PASSWORD/SSLMODE，平台生成机密改名 DB_PASSWORD 并同步容器变量与连接模板占位；design.md 记录本次修订，应用读取的 AIDH_DEP_INSPECTION_DB_* 变量与探测脚本不变，其他设计内容未改动。",
+  "asks": [],
+  "outputs": [
+    "docs/dependencies.json",
+    ".ai-delivery/features/001-v1/design.md"
+  ]
+}
