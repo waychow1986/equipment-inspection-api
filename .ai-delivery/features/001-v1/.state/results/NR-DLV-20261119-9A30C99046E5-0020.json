@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S6",
+  "result": "done",
+  "summary": "S5 再次修订后重新细化计划：技术方案只补了 inspection-db 以非 root 运行，批次划分不变；实施区仍分两批编码（S13/S14 提交路径，S15/S16 查询与重启后持久），每批后接代码审查，维持标准档；按 G2 意见把 AC-08 同时列入第 2 批，并把会话预算建议上调到 30 次、10 小时；TD-004、IQA-019 取日志途径、数据库最小权限与运维令牌途径交技术负责人决定。",
+  "asks": [],
+  "outputs": [
+    ".ai-delivery/features/001-v1/.state/results/NR-DLV-20261119-9A30C99046E5-0020.json"
+  ],
+  "plan": {
+    "schemaVersion": 1,
+    "steps": [
+      {"id": "S13", "capability": "code", "zone": "build", "dependsOn": [], "batch": 1},
+      {"id": "S14", "capability": "review", "zone": "build", "dependsOn": ["S13"], "batch": 1},
+      {"id": "S15", "capability": "code", "zone": "build", "dependsOn": ["S14"], "batch": 2},
+      {"id": "S16", "capability": "review", "zone": "build", "dependsOn": ["S15"], "batch": 2}
+    ],
+    "omitted": [
+      {"capability": "spec", "reason": "规格 spec.md 已完成且通过 G2 评审，PQ-001～PQ-004 都有人工答案，AC-01～AC-08 都有验收场景（IQA-001～IQA-021），无需重做。"},
+      {"capability": "solution", "reason": "技术方案刚在 S5（0019）按依赖绑定反馈修订完毕，只改了 inspection-db 以非 root 运行与数据目录，不影响接口、数据模型或批次；G2 对 S5 的两条非阻断意见（数据库最小权限、运维登记令牌的途径）先交技术负责人决定（见 items），已列为第 1 批编码与 S14 审查的范围，不为此另排一次方案步骤。"},
+      {"capability": "plan", "reason": "本次就是技术方案之后的细化计划，实施区已拆到可以直接编码的粒度，之后不再安排计划步骤。"}
+    ],
+    "batches": [
+      {"n": 1, "criteria": ["AC-01", "AC-06", "AC-08"]},
+      {"n": 2, "criteria": ["AC-02", "AC-03", "AC-04", "AC-05", "AC-07", "AC-08"]}
+    ],
+    "factors": [
+      {"name": "change-size", "lean": "light", "basis": "只有两条业务接口（POST/GET /v1/inspection-records），加健康检查和运维用的令牌 CLI；没有前端、报表，也没有修改或删除功能。"},
+      {"name": "modules", "lean": "medium", "basis": "都在一个服务内：配置、日志白名单、数据库连接与迁移、令牌身份与角色、提交与查询路由、token-admin CLI 六个模块，外加 1 个外部依赖 inspection-db。"},
+      {"name": "new-or-first", "lean": "heavy", "basis": "全新项目，第 1 批要从零搭建工程骨架、Dockerfile、开发者验证命令（runtime/deployment.json）和真实数据库测试的支撑。"},
+      {"name": "risk", "lean": "medium", "basis": "新库只有向前迁移 001_initial，没有存量数据迁移；但涉及令牌摘要存储、最小权限、日志中不得出现凭据或记录内容（AC-08），以及记录只增不改的触发器，需要逐批审查。"}
+    ],
+    "tier": "standard",
+    "budget": {"revisions": 4, "sessions": 30, "hours": 10.0},
+    "items": [
+      {"category": "technical", "question": "确认 TD-004：PQ-003 的人工答案要求令牌与角色的对应关系由运维作为机密配置提供，收回时删除并重新加载。技术方案把它落地为 PostgreSQL 中的令牌登记表：只存 SHA-256 摘要，运维用 token-admin CLI 维护，删除后下一次请求即生效。这是第 1 批编码的基础。", "recommended": "采用令牌登记表方案（TD-004），由技术负责人确认它符合 PQ-003 中“机密配置”的含义。", "alternatives": ["令牌清单作为应用机密注入，修改后重新部署才生效；第 1 批改为读取机密，IQA-021 改为跨运行的人工验证，或记为测试缺口。", "使用云密钥服务（如 Azure Key Vault）并定时重载；会增加云依赖、IaC 和预算。"]},
+      {"category": "technical", "question": "数据库最小权限（G2 对 S5 的意见）：服务运行、启动迁移、token-admin 和独立测试目前共用同一个 schema 所有者账号，这个账号可以删除令牌、停用触发器。第 1 批是否按最小权限拆分？", "recommended": "第 1 批由迁移创建只具备 inspection_record 的 INSERT/SELECT 权限和 access_token 的 SELECT 权限的运行角色，服务处理请求时切换到该角色；迁移与 token-admin 使用所有者账号。S14 审查时核对。", "alternatives": ["本交付保持单一账号，并在 design.md 中把它记为有理由的例外，同时修正 TD-003“即便代码缺陷也无法改写历史”的表述（需要退回 S5 做一次小修订）。"]},
+      {"category": "technical", "question": "生产环境运维如何执行 token-admin 来登记和收回令牌（G2 对 S5 的意见）？网络默认拒绝，数据库只在集群内可达；如果登记不了第一个令牌，所有调用都会返回 401。", "recommended": "第 1 批在 README 的运维说明中写明：在服务容器内执行 node dist/cli/token-admin.js，令牌明文只输出到运维终端，再由运维通过既有的安全渠道交给持有人；S14 审查时核对。", "alternatives": ["由平台提供一个可连接 inspection-db 的一次性运维任务，在其中执行 token-admin（需要平台支持）。"]},
+      {"category": "technical", "question": "IQA-019（AC-08：日志中不出现凭据和记录内容）需要取得候选服务在独立测试期间的全部日志，但目前没有取得途径。取不到时如何对待？", "recommended": "两批的功能测试都对真实服务进程的完整输出做零命中检查，作为开发者侧证据；同时请平台或运维在独立测试结束后导出候选服务日志交给独立测试检索；确实取不到时如实记为测试缺口，由 G4 的人决定是否接受。", "alternatives": ["只依赖开发者侧证据，在 G2 明确接受 AC-08 的独立验收缺口。", "取得日志途径之前不进入独立测试。"]},
+      {"category": "business", "question": "会话预算是否从 22 次上调？到本次为止至少已用 16 次（S1～G2、S12、S5 修订和本次 S6）；剩余 G2、S13～S16、G3、G4、G5 至少还要 8 次，最少合计 24 次，已超过 22 次。若再遇一次批次退回（编码+审查 2 次）和一次需要人回答后继续，约需 27～30 次。时长也相应从 8 小时调到 10 小时。", "recommended": "上调到 30 次会话、10 小时，修订次数 4 次不变。", "alternatives": ["上调到 26 次、8 小时（G2 的建议）：只够最低路径加少量余量，如果平台把依赖绑定等会话也计入，仍可能不够。", "维持 22 次、8 小时：交付很可能在编码或关口阶段因预算耗尽而停下。"]}
+    ],
+    "reason": "S5 在 G2 和测试计划之后又修订了一次，但只补了 inspection-db 容器以非 root 运行（UID/GID 70）和数据目录，接口、数据模型、令牌方案和测试安排都没变，所以设计区不用重做，本次只列实施区。第 1 批（S13 编码、S14 审查）：工程骨架、config/logger（字段白名单）、pg 连接池与启动迁移（含记录表只增不改的触发器，以及 items 中最小权限的运行角色）、令牌登记表与 Bearer 身份/角色钩子、token-admin CLI 及运维说明、POST /v1/inspection-records 与统一错误响应、/healthz、Dockerfile 与 runtime/deployment.json。第 1 批验收 AC-01、AC-06、AC-08，并覆盖 401/403 拒绝。第 2 批（S15 编码、S16 审查）在第 1 批合入后实现 GET /v1/inspection-records?deviceId=…（仅管理人员，从新到旧，空列表，缺设备时返回 400，巡检员调用返回 403），再加停止并重启进程后的持久化功能测试和 IQA-021 收回令牌后的验证，验收 AC-02～AC-05、AC-07。按 G2 意见，AC-08 也列入第 2 批：查询串带有 deviceId，泄露风险最高，所以要对包含查询、重启和收回令牌的完整进程输出重新做零命中检查，S16 审查时一并核对。测试计划 S12 已在编码前产出并锁定；它和关口由平台按骨架排在 S13 之前，所以本计划的 S13 不显式依赖平台补入的节点，顺序由骨架保证。两批的集成和功能测试都连接真实 dev PostgreSQL，Mock 不作为验收证据。维持标准档：改动小，集中在一个服务，没有存量数据迁移，完整档的额外设计评审收益有限；但这是新项目的首个交付，又有安全和日志隐私要求，需要两批编码各自审查，不适合只有一批编码的轻量档。预算上调的理由见 items：已用会话已接近原预算，需要为退回和人工回答留出余量。"
+  }
+}
