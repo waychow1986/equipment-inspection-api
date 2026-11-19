@@ -1,0 +1,106 @@
+{
+  "scenario": "IQA-011",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "不带令牌 提交被拒绝为未识别身份(401)",
+      "passed": true,
+      "observation": "HTTP 401 {\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "kind": null
+    },
+    {
+      "step": "无效令牌 X 提交被拒绝为未识别身份(401)",
+      "passed": true,
+      "observation": "HTTP 401 {\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "kind": null
+    },
+    {
+      "step": "空 Bearer 提交被拒绝为未识别身份(401)",
+      "passed": true,
+      "observation": "HTTP 401 {\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "kind": null
+    },
+    {
+      "step": "M1 查询 D12 为空",
+      "passed": true,
+      "observation": "M1 查询 qa8atbmib5-D12: HTTP 200; 记录数=0",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-19T21:58:26.873206+00:00",
+      "caller": null,
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qa8atbmib5-D12\", \"storeId\": \"qa8atbmib5-S1\", \"conclusion\": \"NORMAL\", \"note\": \"qa8atbmib5-R12-备注\"}",
+      "status": 401,
+      "responseHeaders": {
+        "x-request-id": "ec17aa11-5475-4d9e-bf87-7618c03fa5e5",
+        "www-authenticate": "Bearer",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "64",
+        "date": "Thu, 19 Nov 2026 21:58:26 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T21:58:26.906409+00:00",
+      "caller": "X",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qa8atbmib5-D12\", \"storeId\": \"qa8atbmib5-S1\", \"conclusion\": \"NORMAL\", \"note\": \"qa8atbmib5-R12-备注\"}",
+      "status": 401,
+      "responseHeaders": {
+        "x-request-id": "e5760b5a-8f71-479d-80f6-36767e2ab83a",
+        "www-authenticate": "Bearer",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "64",
+        "date": "Thu, 19 Nov 2026 21:58:26 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T21:58:26.917373+00:00",
+      "caller": "raw-auth",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qa8atbmib5-D12\", \"storeId\": \"qa8atbmib5-S1\", \"conclusion\": \"NORMAL\", \"note\": \"qa8atbmib5-R12-备注\"}",
+      "status": 401,
+      "responseHeaders": {
+        "x-request-id": "d398d975-faef-4eca-bb96-818798cc0c4c",
+        "www-authenticate": "Bearer",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "64",
+        "date": "Thu, 19 Nov 2026 21:58:26 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T21:58:26.954765+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qa8atbmib5-D12",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "17220b7e-e74f-4462-bd39-4545cceda488",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "42",
+        "date": "Thu, 19 Nov 2026 21:58:26 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qa8atbmib5-D12\",\"records\":[]}",
+      "error": null
+    }
+  ]
+}

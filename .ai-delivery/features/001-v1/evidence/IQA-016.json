@@ -1,0 +1,81 @@
+{
+  "scenario": "IQA-016",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "前置：I1 提交 D15（门店 S2）被接受",
+      "passed": true,
+      "observation": "HTTP 201 {\"recordId\":\"63abc7dc-8e55-4e58-8e48-8ce1d5abee03\",\"deviceId\":\"qa8atbmib5-D15\",\"storeId\":\"qa8atbmib5-S2\",\"conclusion\":\"NORMAL\",\"note\":\"qa8atbmib5-R15-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-19T21:58:27.151Z\"}",
+      "kind": null
+    },
+    {
+      "step": "查询门店 S1 的 D1 成功并返回其记录",
+      "passed": true,
+      "observation": "HTTP 200 {\"deviceId\":\"qa8atbmib5-D1\",\"records\":[{\"recordId\":\"61cebc0e-4e55-43ba-ab7a-d6750c3c972e\",\"deviceId\":\"qa8atbmib5-D1\",\"storeId\":\"qa8atbmib5-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qa8atbmib5-R1-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-19T21:58:22.554Z\"}]}",
+      "kind": null
+    },
+    {
+      "step": "查询门店 S2 的 D15 成功且恰好 1 条门店为 S2",
+      "passed": true,
+      "observation": "HTTP 200 {\"deviceId\":\"qa8atbmib5-D15\",\"records\":[{\"recordId\":\"63abc7dc-8e55-4e58-8e48-8ce1d5abee03\",\"deviceId\":\"qa8atbmib5-D15\",\"storeId\":\"qa8atbmib5-S2\",\"conclusion\":\"NORMAL\",\"note\":\"qa8atbmib5-R15-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-19T21:58:27.151Z\"}]}",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-19T21:58:27.153721+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qa8atbmib5-D15\", \"storeId\": \"qa8atbmib5-S2\", \"conclusion\": \"NORMAL\", \"note\": \"qa8atbmib5-R15-备注\"}",
+      "status": 201,
+      "responseHeaders": {
+        "x-request-id": "8b360dc1-b83e-41ab-9fe6-070eed19c118",
+        "location": "/v1/inspection-records?deviceId=qa8atbmib5-D15",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "230",
+        "date": "Thu, 19 Nov 2026 21:58:27 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"recordId\":\"63abc7dc-8e55-4e58-8e48-8ce1d5abee03\",\"deviceId\":\"qa8atbmib5-D15\",\"storeId\":\"qa8atbmib5-S2\",\"conclusion\":\"NORMAL\",\"note\":\"qa8atbmib5-R15-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-19T21:58:27.151Z\"}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T21:58:27.183022+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qa8atbmib5-D1",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "63ef90f2-bfed-4ad6-8925-95e73c88805a",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "271",
+        "date": "Thu, 19 Nov 2026 21:58:27 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qa8atbmib5-D1\",\"records\":[{\"recordId\":\"61cebc0e-4e55-43ba-ab7a-d6750c3c972e\",\"deviceId\":\"qa8atbmib5-D1\",\"storeId\":\"qa8atbmib5-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qa8atbmib5-R1-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-19T21:58:22.554Z\"}]}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T21:58:27.233418+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qa8atbmib5-D15",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "ec8caca7-15aa-4555-aec9-f7668ab74dfc",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "272",
+        "date": "Thu, 19 Nov 2026 21:58:27 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qa8atbmib5-D15\",\"records\":[{\"recordId\":\"63abc7dc-8e55-4e58-8e48-8ce1d5abee03\",\"deviceId\":\"qa8atbmib5-D15\",\"storeId\":\"qa8atbmib5-S2\",\"conclusion\":\"NORMAL\",\"note\":\"qa8atbmib5-R15-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-19T21:58:27.151Z\"}]}",
+      "error": null
+    }
+  ]
+}

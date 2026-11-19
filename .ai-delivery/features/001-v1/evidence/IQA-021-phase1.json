@@ -1,0 +1,59 @@
+{
+  "scenario": "IQA-021",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定",
+    "A-12"
+  ],
+  "checkpoints": [
+    {
+      "step": "删除前：I2 提交 D16 被接受",
+      "passed": true,
+      "observation": "HTTP 201 {\"recordId\":\"4aad6b4d-e026-450b-9bff-dda952911111\",\"deviceId\":\"qa8atbmib5-D16\",\"storeId\":\"qa8atbmib5-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qa8atbmib5-R16-备注\",\"inspectorId\":\"<I2-HOLDER>\",\"submittedAt\":\"2026-11-19T21:58:27.331Z\"}",
+      "kind": null
+    },
+    {
+      "step": "删除前：M1 查询 D16 得到 1 条并保存",
+      "passed": true,
+      "observation": "HTTP 200 {\"deviceId\":\"qa8atbmib5-D16\",\"records\":[{\"recordId\":\"4aad6b4d-e026-450b-9bff-dda952911111\",\"deviceId\":\"qa8atbmib5-D16\",\"storeId\":\"qa8atbmib5-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qa8atbmib5-R16-备注\",\"inspectorId\":\"<I2-HOLDER>\",\"submittedAt\":\"2026-11-19T21:58:27.331Z\"}]}",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-19T21:58:27.334441+00:00",
+      "caller": "I2",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qa8atbmib5-D16\", \"storeId\": \"qa8atbmib5-S1\", \"conclusion\": \"ABNORMAL\", \"note\": \"qa8atbmib5-R16-备注\"}",
+      "status": 201,
+      "responseHeaders": {
+        "x-request-id": "a8809499-07c9-4603-85b0-f92375804eb4",
+        "location": "/v1/inspection-records?deviceId=qa8atbmib5-D16",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "232",
+        "date": "Thu, 19 Nov 2026 21:58:27 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"recordId\":\"4aad6b4d-e026-450b-9bff-dda952911111\",\"deviceId\":\"qa8atbmib5-D16\",\"storeId\":\"qa8atbmib5-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qa8atbmib5-R16-备注\",\"inspectorId\":\"<I2-HOLDER>\",\"submittedAt\":\"2026-11-19T21:58:27.331Z\"}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T21:58:27.359849+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qa8atbmib5-D16",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "f9e232d7-dd27-4e8f-ab6f-4e5afd7a7709",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "274",
+        "date": "Thu, 19 Nov 2026 21:58:27 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qa8atbmib5-D16\",\"records\":[{\"recordId\":\"4aad6b4d-e026-450b-9bff-dda952911111\",\"deviceId\":\"qa8atbmib5-D16\",\"storeId\":\"qa8atbmib5-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qa8atbmib5-R16-备注\",\"inspectorId\":\"<I2-HOLDER>\",\"submittedAt\":\"2026-11-19T21:58:27.331Z\"}]}",
+      "error": null
+    }
+  ]
+}
