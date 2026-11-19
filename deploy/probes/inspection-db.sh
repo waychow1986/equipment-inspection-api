@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 探测 inspection-db（PostgreSQL）：可达性、认证，以及 docs/dependencies.json 中声明的约束
-#   server-version、schema-privileges（各报告一次）。
+#   server-version、schema-privileges、role-privileges（各报告一次）。
 # 只使用平台探测环境提供的 bash / timeout / python3；不输出任何机密。
 # 输入：AIDH_DEP_INSPECTION_DB_{ADDRESS,DATABASE,USERNAME,PASSWORD,SSLMODE}
 # 输出：$AIDH_PROBE_RESULT（JSON：reachable、authenticated、results[]）
@@ -9,10 +9,10 @@ set -uo pipefail
 : "${AIDH_PROBE_RESULT:?AIDH_PROBE_RESULT is required}"
 
 timeout 60 python3 -I - <<'PY'
-import base64, hashlib, hmac, json, os, socket, ssl, struct
+import base64, hashlib, hmac, json, os, re, socket, ssl, struct
 
 RESULT_PATH = os.environ["AIDH_PROBE_RESULT"]
-CONSTRAINTS = ["server-version", "schema-privileges"]
+CONSTRAINTS = ["server-version", "schema-privileges", "role-privileges"]
 result = {"reachable": False, "authenticated": False, "results": []}
 
 
@@ -216,6 +216,26 @@ try:
         % (can_create_db, schema_exists, schema_ok)
     )
 
+    # 写入角色名与服务的派生规则一致：<数据库名>_inspection_writer，转小写，非 [a-z0-9_] 字符替换为 _
+    writer = re.sub(r"[^a-z0-9_]", "_", (database + "_inspection_writer").lower())
+    if not re.fullmatch(r"[a-z_][a-z0-9_]{0,62}", writer):
+        satisfied["role-privileges"] = False
+        evidence["role-privileges"] = "derived writer role name is not a valid identifier (database name too long or invalid)"
+    else:
+        role = query(
+            "SELECT r.rolsuper, r.rolcreaterole, "
+            "EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '%s'), "
+            "CASE WHEN EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '%s') "
+            "THEN pg_has_role(current_user, '%s', 'MEMBER') ELSE false END "
+            "FROM pg_roles r WHERE r.rolname = current_user" % (writer, writer, writer)
+        )[0]
+        is_super, can_create_role, writer_exists, is_member = (v == "t" for v in role)
+        satisfied["role-privileges"] = is_super or can_create_role or (writer_exists and is_member)
+        evidence["role-privileges"] = (
+            "superuser=%s; CREATEROLE=%s; writer role %s exists=%s; member of writer role=%s"
+            % (is_super, can_create_role, writer, writer_exists, is_member)
+        )
+
     try:
         send_msg(sock, b"X", b"")
     except OSError:
@@ -230,6 +250,6 @@ except (OSError, ConnectionError, ssl.SSLError, ValueError, KeyError, struct.err
 PY
 rc=$?
 if [ ! -s "$AIDH_PROBE_RESULT" ]; then
-  printf '{"reachable":false,"authenticated":false,"results":[{"name":"server-version","status":"unsatisfied","evidence":"probe did not complete (exit %s)"},{"name":"schema-privileges","status":"unsatisfied","evidence":"probe did not complete (exit %s)"}]}\n' "$rc" "$rc" > "$AIDH_PROBE_RESULT"
+  printf '{"reachable":false,"authenticated":false,"results":[{"name":"server-version","status":"unsatisfied","evidence":"probe did not complete (exit %s)"},{"name":"schema-privileges","status":"unsatisfied","evidence":"probe did not complete (exit %s)"},{"name":"role-privileges","status":"unsatisfied","evidence":"probe did not complete (exit %s)"}]}\n' "$rc" "$rc" "$rc" > "$AIDH_PROBE_RESULT"
 fi
 exit 0

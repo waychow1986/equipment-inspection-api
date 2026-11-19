@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S22",
+  "result": "done",
+  "summary": "按 G2 退回后的五项决定重做技术方案：① 令牌改为应用机密 INSPECTION_ACCESS_TOKENS（只含摘要—持有人—角色，启动时加载，格式错误拒绝启动；收回即修改机密并重新部署），删除 access_token 表、token-admin 与独立测试直连数据库的做法，test 值登记 I1/I2/M1 且持有人与 QA_INSPECTOR_*_HOLDER 一致；② 新增无需身份的 GET /openapi.json（OpenAPI 3.0.3，内联请求 schema、conclusion 枚举 NORMAL/ABNORMAL、deviceId 查询参数），已对照锁定的 qa-run.sh 发现逻辑；③ 迁移用所有者账号，请求会话 SET ROLE 到只有 inspection_record INSERT/SELECT 的写入角色 <数据库名>_inspection_writer，TD-003 改为准确表述并记残余风险为有理由的例外；④ 不声明日志导出地址，IQA-019 记为测试缺口、AC-08 以开发者侧零命中检查为证据交 G4；⑤ Runbook 写明令牌生成、摘要、登记、收回步骤（README 按此编写）。依赖声明修订：inspection-db 的 purpose 与 sharing 说明、新增约束 role-privileges（探测脚本同步，本环境无 PostgreSQL，只验证了失败路径），secrets 新增 INSPECTION_ACCESS_TOKENS、QA_INSPECTOR_1_HOLDER、QA_INSPECTOR_2_HOLDER，QA_INVALID_TOKEN 改为可选；部署声明不变。平台前提 P-1：候选服务容器需获得 INSPECTION_ACCESS_TOKENS 的 test 值。",
+  "asks": [],
+  "outputs": [
+    ".ai-delivery/features/001-v1/design.md",
+    "docs/dependencies.json",
+    "deploy/probes/inspection-db.sh",
+    ".ai-delivery/features/001-v1/.state/results/NR-DLV-20261119-9A30C99046E5-0023.json"
+  ]
+}

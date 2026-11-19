@@ -4,14 +4,15 @@
     {
       "name": "inspection-db",
       "kind": "postgresql",
-      "purpose": "持久保存巡检记录（只增不改）与访问令牌登记表（只存令牌摘要），保证服务重启或重新部署后已提交的记录仍可查询（FR-001、FR-021、FR-022、FR-027、AC-07）。服务启动时在 schema `inspection` 中自动执行迁移。",
+      "purpose": "持久保存巡检记录（只增不改），保证服务重启或重新部署后已提交的记录仍可查询（FR-001、FR-021、FR-022、AC-07）。服务启动时以连接用户（所有者）在 schema `inspection` 中执行迁移，并创建只具备巡检记录 INSERT/SELECT 权限的写入角色 `<数据库名>_inspection_writer`；处理请求的会话切换到该角色（最小权限）。访问令牌不保存在数据库中。",
       "recommendation": {
         "form": "container",
         "reason": "新项目没有技术基线与客户偏好记录；数据量小、单库即可满足；开源 PostgreSQL 由平台以容器运行并挂持久卷即可满足 AC-07，无需云资源 IaC。生产如需托管备份，可在依赖与机密任务中改为客户提供的托管 PostgreSQL（需 TLS 时把 sslmode 设为 require 或 verify-full）。"
       },
       "constraints": {
         "server-version": "PostgreSQL 服务器版本不低于 14（使用 identity 列、clock_timestamp 与 sha256 等能力）",
-        "schema-privileges": "连接用户能在所连数据库中创建 schema `inspection`，或该 schema 已存在且用户对其拥有 CREATE 与 USAGE 权限（服务启动时执行迁移）"
+        "schema-privileges": "连接用户能在所连数据库中创建 schema `inspection`，或该 schema 已存在且用户对其拥有 CREATE 与 USAGE 权限（服务启动时执行迁移）",
+        "role-privileges": "连接用户能创建并切换到写入角色 `<数据库名>_inspection_writer`：具备 CREATEROLE 或为超级用户；或该角色已存在且连接用户是其成员（服务启动时创建角色并授权，处理请求时 SET ROLE 到该角色）"
       },
       "realInstance": {
         "dev": true,
@@ -87,33 +88,65 @@
         }
       },
       "sharing": {
-        "description": "复用其他项目的 PostgreSQL 实例时，为本项目单独建立数据库与登录用户（例如数据库 inspection_<项目>、用户 inspection_<项目>），该用户只对本数据库拥有 CONNECT/CREATE 权限，不授予其他数据库的任何权限；服务只使用其中的 schema `inspection`。不要与其他项目共用数据库或用户。"
+        "description": "复用其他项目的 PostgreSQL 实例时，为本项目单独建立数据库与登录用户（例如数据库 inspection_<项目>、用户 inspection_<项目>），该用户只对本数据库拥有 CONNECT/CREATE 权限，并具备 CREATEROLE（服务会创建名为 <数据库名>_inspection_writer 的 NOLOGIN 写入角色；角色名含数据库名，不与其他项目冲突）；不授予其他数据库的任何权限，服务只使用其中的 schema `inspection`。不要与其他项目共用数据库或用户。"
       }
     }
   ],
   "secrets": [
     {
+      "name": "INSPECTION_ACCESS_TOKENS",
+      "purpose": "服务的令牌清单（规格 PQ-003 的“机密配置”）：JSON 数组，每项 {\"sha256\": 令牌 UTF-8 字节的 SHA-256 小写十六进制, \"holder\": 非秘密的持有人标识, \"role\": \"inspector\" 或 \"manager\"}，不得包含令牌明文或其他键。服务启动时加载，缺失或格式错误时拒绝启动；新增或收回令牌即修改本值并重新部署服务。test 值必须登记 QA_INSPECTOR_1_TOKEN、QA_INSPECTOR_2_TOKEN 的摘要（role 为 inspector，holder 分别等于 QA_INSPECTOR_1_HOLDER、QA_INSPECTOR_2_HOLDER）与 QA_MANAGER_TOKEN 的摘要（role 为 manager），不得登记 QA_INVALID_TOKEN；独立测试的两个阶段之间由运维删除 I2 的条目，测试结束后加回。开发者测试自行生成清单，不需要 dev 值。",
+      "environments": [
+        "test"
+      ],
+      "required": true
+    },
+    {
       "name": "QA_INSPECTOR_1_TOKEN",
-      "purpose": "独立测试用巡检员令牌 I1（规格验收场景的测试身份）；≥32 个字符的高熵随机串。独立测试只把其 SHA-256 摘要登记到 test 实例的令牌登记表，不写出原文。",
-      "environments": ["test"],
+      "purpose": "独立测试用巡检员令牌 I1；≥32 个字符的高熵随机串。其摘要须登记在 INSPECTION_ACCESS_TOKENS 的 test 值中（role 为 inspector）。独立测试只在内存中使用，不写出原文。",
+      "environments": [
+        "test"
+      ],
       "required": true
     },
     {
       "name": "QA_INSPECTOR_2_TOKEN",
-      "purpose": "独立测试用巡检员令牌 I2（IQA-004、IQA-021 中被收回的令牌）；≥32 个字符的高熵随机串，与其他测试令牌不同。",
-      "environments": ["test"],
+      "purpose": "独立测试用巡检员令牌 I2（IQA-004、IQA-021 中被收回的令牌）；≥32 个字符的高熵随机串，与其他测试令牌不同。其摘要须登记在 INSPECTION_ACCESS_TOKENS 的 test 值中，两阶段之间由运维删除。",
+      "environments": [
+        "test"
+      ],
       "required": true
     },
     {
       "name": "QA_MANAGER_TOKEN",
-      "purpose": "独立测试用管理人员令牌 M1；≥32 个字符的高熵随机串，与其他测试令牌不同。",
-      "environments": ["test"],
+      "purpose": "独立测试用管理人员令牌 M1；≥32 个字符的高熵随机串，与其他测试令牌不同。其摘要须登记在 INSPECTION_ACCESS_TOKENS 的 test 值中（role 为 manager）。",
+      "environments": [
+        "test"
+      ],
       "required": true
     },
     {
       "name": "QA_INVALID_TOKEN",
-      "purpose": "独立测试用无效令牌 X（不会被登记，用于验证未识别身份被拒绝）；≥32 个字符的随机串，与其他测试令牌不同。",
-      "environments": ["test"],
+      "purpose": "独立测试用无效令牌 X：≥32 个字符的随机串，与其他测试令牌不同，不得登记在 INSPECTION_ACCESS_TOKENS 中。未提供时测试脚本自行随机生成。",
+      "environments": [
+        "test"
+      ],
+      "required": false
+    },
+    {
+      "name": "QA_INSPECTOR_1_HOLDER",
+      "purpose": "I1 的持有人标识（非秘密，例如 qa-inspector-1），必须与 INSPECTION_ACCESS_TOKENS 的 test 值中 I1 条目的 holder 完全一致；独立测试用它核对记录中的巡检员（IQA-014）。",
+      "environments": [
+        "test"
+      ],
+      "required": true
+    },
+    {
+      "name": "QA_INSPECTOR_2_HOLDER",
+      "purpose": "I2 的持有人标识（非秘密，例如 qa-inspector-2，与 I1 不同），必须与 INSPECTION_ACCESS_TOKENS 的 test 值中 I2 条目的 holder 完全一致。",
+      "environments": [
+        "test"
+      ],
       "required": true
     }
   ]
