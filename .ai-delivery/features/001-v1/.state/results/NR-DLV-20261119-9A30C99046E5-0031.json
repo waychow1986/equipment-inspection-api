@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S23",
+  "result": "done",
+  "summary": "S22 按 S30 依赖绑定前检查的反馈修订了依赖声明（接入字段与连接模板键改为大写、生成机密改名 DB_PASSWORD），只改依赖接入形式，产品行为、契约和批次划分都没有变；设计区没有待做步骤，实施区沿用 S30 编码、S31 审查（第 1 批：AC-01/AC-06/AC-08）和 S32 编码、S33 审查（第 2 批：AC-02～AC-05/AC-07/AC-08）；维持标准档，建议把会话预算上调到 42 次、14 小时，另有两项 G2 遗留的技术决定仍待人回答。",
+  "asks": [],
+  "outputs": [
+    ".ai-delivery/features/001-v1/.state/results/NR-DLV-20261119-9A30C99046E5-0031.json"
+  ],
+  "plan": {
+    "schemaVersion": 1,
+    "steps": [
+      {"id": "S30", "capability": "code", "zone": "build", "dependsOn": [], "batch": 1},
+      {"id": "S31", "capability": "review", "zone": "build", "dependsOn": ["S30"], "batch": 1},
+      {"id": "S32", "capability": "code", "zone": "build", "dependsOn": ["S31"], "batch": 2},
+      {"id": "S33", "capability": "review", "zone": "build", "dependsOn": ["S32"], "batch": 2}
+    ],
+    "omitted": [
+      {"capability": "spec", "reason": "spec.md 自前两次 G2 以来没有改过，仍完整覆盖 AC-01～AC-08（IQA-001～IQA-021）。本次 S22 只改了依赖声明中的字段命名，没有改变产品行为，所以不用重做规格。"},
+      {"capability": "solution", "reason": "S22（第 0030 次运行）已经按 S30 依赖绑定前检查的反馈完成修订：接入字段 ADDRESS/DATABASE/USERNAME/PASSWORD/SSLMODE 与注入变量的后缀一致，生成机密 DB_PASSWORD 与容器变量、连接模板同步，应用读取的 AIDH_DEP_INSPECTION_DB_* 和探测脚本不变。design.md 其余内容维持 G2 已通过的版本，不需要再做方案。G2 的非阻断意见（role-privileges 探测在客户复用实例时可能误报）在平台推荐的容器形态下不触发，不单独排一次方案步骤；如果改用客户提供的实例，在依赖与机密任务中处理。"},
+      {"capability": "plan", "reason": "本次就是方案修订后的细化计划。批次划分依据 design.md，没有变化；之后只有退回时才需要重新计划，所以不预排计划步骤。"}
+    ],
+    "batches": [
+      {"n": 1, "criteria": ["AC-01", "AC-06", "AC-08"]},
+      {"n": 2, "criteria": ["AC-02", "AC-03", "AC-04", "AC-05", "AC-07", "AC-08"]}
+    ],
+    "factors": [
+      {"name": "change-size", "lean": "light", "basis": "只有两条业务接口（提交、按设备查询），另有 /healthz 和 /openapi.json；一张记录表、一个初始迁移；没有前端、报表，也没有修改或删除功能。本次修订只涉及依赖声明的字段命名。"},
+      {"name": "modules", "lean": "medium", "basis": "都在一个服务内，但横跨 config 与启动时令牌加载、logger 白名单、db（连接池、迁移、写入角色）、auth 钩子、inspections（路由、校验、仓储）、http 错误、openapi 共 7 组模块；外部依赖只有 inspection-db。"},
+      {"name": "new-or-first", "lean": "heavy", "basis": "全新项目的首个交付，仓库还没有任何应用代码。第 1 批要从零搭建工程骨架、Dockerfile、runtime/deployment.json，以及连接真实 dev PostgreSQL 的测试支撑。"},
+      {"name": "risk", "lean": "medium", "basis": "新库只有向前的初始迁移，没有存量数据要迁移。但涉及令牌摘要机密、数据库最小权限拆分与残余风险 R-3、日志中不得出现凭据和记录内容（AC-08）、记录只增不改，以及刚修订过的依赖接入字段，每批都需要单独审查。"}
+    ],
+    "tier": "standard",
+    "budget": {"revisions": 4, "sessions": 42, "hours": 14.0},
+    "items": [
+      {"category": "business", "question": "会话预算是否从 36 次、12 小时上调？本次 S23 已是第 31 次运行，第 1 批编码因依赖绑定前检查受阻，又重做了一次方案和计划。剩余最低路径为：S30～S33 两批编码与审查（4 次）、G3、G4、G5（3 次）；如果平台因方案修订再跑一次 G2，还要加 1 次。合计 38～39 次，已超过 36 次，还没有给批次退回或问答留余量。", "recommended": "上调到 42 次会话、14 小时，修订次数 4 次不变。最低路径之外留 3～4 次余量，大约够一次批次退回（编码加审查）或一次问答。", "alternatives": ["上调到 40 次、13 小时：只够最低路径，加约 1 次余量。", "维持 36 次、12 小时：按最低路径会在 G4 或 G5 之前耗尽预算。"]},
+      {"category": "technical", "question": "test 环境机密由谁在什么时候登记？（G2 与上一次 S23 已经提出，至今没有人工答案。）候选部署和独立测试依赖下列 test 值：QA_INSPECTOR_1_TOKEN、QA_INSPECTOR_2_TOKEN、QA_MANAGER_TOKEN、QA_INSPECTOR_1_HOLDER、QA_INSPECTOR_2_HOLDER，以及 INSPECTION_ACCESS_TOKENS 中 I1、I2、M1 的三个条目。独立测试的两个阶段之间还要删除 I2 的条目，测试结束后加回（P-1、R-1、A-12）。", "recommended": "技术负责人在第 2 批编码（S32）完成之前登记全部 test 值，并指定一名运维负责在独立测试期间删除 I2、测试结束后加回；同时向平台确认候选容器会注入 AIDH_SECRET_INSPECTION_ACCESS_TOKENS。", "alternatives": ["G3 通过后再登记：可能让候选部署停下来等人工操作。", "由平台的依赖与机密任务提示并收集这些值，技术负责人只在收到提示时提供；I2 的删除和加回仍要指定专人。"]},
+      {"category": "technical", "question": "是否接受 R-3 作为有理由的例外？（G2 与上一次 S23 已经提出，至今没有人工答案。）服务进程持有数据库所有者凭据，只在启动迁移和授权时使用；处理请求的会话切换到只有 INSERT/SELECT 权限的写入角色，并有触发器拒绝修改和删除。但能控制服务进程的人仍能改写记录。", "recommended": "接受：平台只为依赖注入一组凭据，部署声明也没有一次性迁移任务；请求路径已做到最小权限，再加触发器保护，按 TD-003、TD-013 记录为例外。", "alternatives": ["不接受：需要平台为迁移和运行分别提供凭据，或支持一次性迁移任务。这超出本交付的平台能力，会推迟本交付。"]}
+    ],
+    "reason": "S30（第 1 批编码）在依赖绑定前检查时受阻，退回 S22。S22 修订了依赖声明：inspection-db 的接入字段和连接模板键改为大写 ADDRESS/DATABASE/USERNAME/PASSWORD/SSLMODE，生成机密改名为 DB_PASSWORD，容器变量和连接模板中的占位同步修改。应用读取的 AIDH_DEP_INSPECTION_DB_* 变量、探测脚本、契约、数据模型和批次划分都没有变，所以设计区没有待做步骤，本计划只列实施区。步骤编号沿用计划图中已有的 S30～S33；测试计划节点和各关口由平台按骨架补入。tasks-qa.md、qa-run.sh 已锁定，不受本次修订影响。\n第 1 批（S30 编码、S31 审查）：工程骨架与 ts/eslint/vitest 配置；以非 root 用户运行的 Dockerfile；runtime/deployment.json；config 读取 AIDH_DEP_INSPECTION_DB_*，启动时加载 INSPECTION_ACCESS_TOKENS（格式错误时非零退出，输出中不含清单内容）；logger 字段白名单；pg 连接池，启动时迁移（advisory lock、只增不改触发器）并授权写入角色；Bearer 身份与角色钩子（401→403→400）；POST /v1/inspection-records 与统一错误响应；/healthz；/openapi.json（含提交路由和 conclusion 枚举）；README 运维说明。验收 AC-01、AC-06、AC-08。S31 审查时要核对代码读取的环境变量名与修订后的依赖声明一致。\n第 2 批（S32 编码、S33 审查）在第 1 批合入后进行：GET /v1/inspection-records?deviceId=（只允许管理人员；按提交时间从新到旧；只返回该设备的记录；无记录时返回空列表；缺少 deviceId 返回 400；巡检员调用返回 403）；在 /openapi.json 中补上查询路由；停止并重启进程后仍能查到记录；从机密中删除令牌并重启后该令牌被拒绝。验收 AC-02～AC-05、AC-07。查询串里带有 deviceId，所以 AC-08 在第 2 批再列一次，对包含查询和重启的完整进程输出重新做零命中检查。两批的集成测试和功能测试都连接真实的 dev PostgreSQL，Mock 不作为验收证据。\n档位维持标准档：改动小，集中在一个服务，没有存量数据迁移，完整档的额外评审收益有限；但这是新项目的首个交付，又有凭据、最小权限和日志隐私要求，需要两批编码各自审查，不适合只有一批编码的轻量档。\n预算建议上调到 42 次会话、14 小时（理由见 items）。另有两项 G2 遗留的技术决定（test 机密的登记责任人、R-3 例外）仍待技术负责人回答，本计划不代为决定。"
+  }
+}
