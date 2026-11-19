@@ -17,7 +17,7 @@
     "errorLogRules": [
       {
         "name": "app-error-log",
-        "type": "structured",
+        "kind": "structured",
         "field": "level",
         "values": ["error", "fatal"],
         "messageField": "msg",
@@ -25,7 +25,7 @@
       },
       {
         "name": "node-uncaught-error",
-        "type": "pattern",
+        "kind": "pattern",
         "pattern": "^(?<message>(?:[A-Z][A-Za-z]*)?Error(?: \\[[A-Z_]+\\])?: .{0,200})",
         "severity": "high"
       }

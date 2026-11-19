@@ -365,8 +365,8 @@ Coding 会创建或修改的路径（写路径清单）：
 - 输出：标准输出，每行一个 JSON 对象（pino），`level` 以文本标签输出（`formatters.level` → `"level":"error"`），消息字段 `msg`。
 - 级别约定：`info` 启动、迁移完成、访问日志（2xx/4xx）；`warn` 数据库瞬时错误后恢复；`error` 5xx、数据库不可达、迁移失败；`fatal` 配置无效、未捕获异常。4xx 是调用方问题，不记为 `error`。
 - `docs/deployment.json` 的 `operations.errorLogRules`：
-  - `app-error-log`（structured，`level` ∈ `error`/`fatal`，`messageField: msg`，severity high）：发现 5xx、数据库与迁移故障、崩溃。
-  - `node-uncaught-error`（pattern，severity high）：日志器初始化前的非 JSON 崩溃输出（如 `Error: Cannot find module …`）。
+  - `app-error-log`（`kind: structured`，`level` ∈ `error`/`fatal`，`messageField: msg`，severity high）：发现 5xx、数据库与迁移故障、崩溃。
+  - `node-uncaught-error`（`kind: pattern`，severity high）：日志器初始化前的非 JSON 崩溃输出（如 `Error: Cannot find module …`）。
 - 指标与追踪：规格无要求，第一版不引入；`X-Request-Id` 用于把调用方报障与访问日志关联。
 
 ## SLO、限制、扩缩容、重试与恢复
