@@ -56,6 +56,9 @@ def redact(text):
             text = text.replace(TOK[k], "<%s>" % k)
     if LOG_TOKEN:
         text = text.replace(LOG_TOKEN, "<LOGTOKEN>")
+    for k in ("I1", "I2"):
+        if len(HOLDER.get(k) or "") >= 3:
+            text = text.replace(HOLDER[k], "<%s-HOLDER>" % k)
     return text
 
 
