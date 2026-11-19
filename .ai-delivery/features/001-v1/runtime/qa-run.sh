@@ -470,6 +470,7 @@ LATE_CHECKS = []   # (scenario id, marker) that must never appear in any query
 FAIL_TOKEN_CHECKS = []  # (scenario, label, token codes found in a failure response)
 SAVED = {}         # query results saved before the redeploy
 RUN = None
+I2_EARLY = False   # I2 already unknown (401) in phase 1 -> environment problem (A-12), not a product defect
 
 
 def is_input(r):
@@ -483,12 +484,16 @@ def brief(r):
 
 
 class Sc:
-    def __init__(self, sid, tag="", assumptions=None):
+    def __init__(self, sid, tag="", assumptions=None, kind="defect"):
         self.sid, self.tag, self.cps = sid, tag, []
         self.assumptions = list(assumptions or [])
+        self.kind = kind
         del LOGBOOK[:]
 
-    def cp(self, step, ok, obs, kind="defect"):
+    def cp(self, step, ok, obs, kind=None):
+        kind = kind or self.kind
+        if not ok and kind == "gap" and I2_EARLY and (self.kind == "gap" or "I2" in step):
+            obs = "[I2 在阶段 1 已不被识别（A-12，环境/平台问题）] " + str(obs)
         self.cps.append({"step": step, "passed": bool(ok), "observation": redact(str(obs))[:1500],
                          "kind": None if ok else kind})
         return bool(ok)
@@ -551,8 +556,14 @@ def one_record(sc, step, device, n=1):
 
 # ---------------- phase 1 ----------------
 def phase1():
+    global I2_EARLY
     S1, S2 = RUN + "-S1", RUN + "-S2"
     R = lambda n: "%s-R%s-备注" % (RUN, n)
+    pre = query("I2", RUN + "-PROBE")
+    if pre.status == 401:
+        I2_EARLY = True
+        ENV_NOTES.append("阶段 1 开始时 I2 查询即被拒绝为未识别身份(401)：I2 可能未登记或已提前从机密配置删除（A-12，环境/平台问题）；依赖 I2 的检查点记为测试缺口")
+    k2 = "gap" if I2_EARLY else "defect"
 
     sc = Sc("IQA-001", assumptions=BASE_ASSUME + ["A-10"])
     r = submit("I1", dev(1), S1, "异常", R(1))
@@ -595,13 +606,12 @@ def phase1():
               "time=%s T0=%.0f T1=%.0f" % (sval(rget(x, "time")), t0, t1))
     sc.done()
 
-    sc = Sc("IQA-004", assumptions=BASE_ASSUME + ["A-8"])
+    sc = Sc("IQA-004", assumptions=BASE_ASSUME + ["A-8"], kind=k2)
     ra = submit("I1", dev(4), S1, "正常", R("4a"))
     time.sleep(1.2)
     rb = submit("I2", dev(4), S1, "异常", R("4b"))
-    sc.cp("I1、I2 两次提交都被接受", ra.ok and rb.ok, brief(ra) + " | " + brief(rb))
-    if rb.status == 401:
-        ENV_NOTES.append("阶段 1 中 I2 被拒绝为未识别身份：I2 可能已提前从机密配置删除（A-12）")
+    sc.cp("I1 提交被接受", ra.ok, brief(ra), kind="defect")
+    sc.cp("I2 提交被接受", rb.ok, brief(rb))
     recs = one_record(sc, "M1 查询 D4 恰好 2 条", dev(4), 2)
     if len(recs) == 2:
         missing = [(i, role) for i, x in enumerate(recs) for role in ("id", "device", "store", "conclusion", "remark", "inspector", "time")
@@ -706,7 +716,7 @@ def phase1():
     sc = Sc("IQA-013", assumptions=BASE_ASSUME)
     for who in ("I1", "I2"):
         x = query(who, dev(1))
-        sc.cp(who + " 查询被拒绝为无权执行该操作(403)", x.status == 403, brief(x))
+        sc.cp(who + " 查询被拒绝为无权执行该操作(403)", x.status == 403, brief(x), kind=k2 if who == "I2" else "defect")
         sc.cp(who + " 响应不含 D1 记录内容", R(1) not in (x.body or "") and S1 not in (x.body or ""), brief(x))
     sc.done()
 
@@ -754,11 +764,9 @@ def phase1():
         if RUN + "-R8" in (x.body or ""):
             LATE_CHECKS.append(("IQA-008-leak", "x"))
 
-    sc = Sc("IQA-021", tag="-phase1", assumptions=BASE_ASSUME + ["A-12"])
+    sc = Sc("IQA-021", tag="-phase1", assumptions=BASE_ASSUME + ["A-12"], kind=k2)
     r = submit("I2", dev(16), S1, "异常", R(16))
     sc.cp("删除前：I2 提交 D16 被接受", r.ok, brief(r))
-    if r.status == 401:
-        ENV_NOTES.append("阶段 1 中 I2 已被拒绝(401)：I2 在测试开始前已从机密配置删除（A-12，环境问题）")
     q, recs = q_records(dev(16))
     sc.cp("删除前：M1 查询 D16 得到 1 条并保存", recs is not None and len(recs) == 1, brief(q))
     SAVED["D16"] = recs
@@ -872,14 +880,17 @@ def state_file():
 def save_state():
     x_generated = not sec("QA_INVALID_TOKEN")
     st = {"RUN": RUN, "API": API, "INSP": INSP, "SAVED": SAVED, "RESULTS": RESULTS, "ENV_NOTES": ENV_NOTES,
-          "FAIL_TOKEN_CHECKS": FAIL_TOKEN_CHECKS, "X": TOK["X"] if x_generated else None}
+          "FAIL_TOKEN_CHECKS": FAIL_TOKEN_CHECKS, "X": TOK["X"] if x_generated else None,
+          "ENV_ERRORS": ENV_ERRORS, "I2_EARLY": I2_EARLY}
     os.makedirs(STATE_DIR, exist_ok=True)
     with open(state_file(), "w", encoding="utf-8") as f:
         json.dump(st, f, ensure_ascii=False)
 
 
 def load_state():
-    global RUN
+    global RUN, I2_EARLY
+    if not os.path.exists(state_file()):
+        return False
     with open(state_file(), encoding="utf-8") as f:
         st = json.load(f)
     RUN = st["RUN"]
@@ -891,6 +902,9 @@ def load_state():
     FAIL_TOKEN_CHECKS.extend([tuple(x) for x in st["FAIL_TOKEN_CHECKS"]])
     if st.get("X"):
         TOK["X"] = st["X"]
+    ENV_ERRORS.extend(st.get("ENV_ERRORS") or [])
+    I2_EARLY = bool(st.get("I2_EARLY"))
+    return True
 
 
 ORDER = ["IQA-%03d" % i for i in range(1, 22)]
@@ -969,8 +983,9 @@ def main():
         phase1()
         if MULTI:
             save_state()
-    else:
-        load_state()
+    elif not load_state():
+        write_result(global_gaps=["阶段 %d 未找到阶段 1 保存的状态（QA_STATE_DIR/qa-state.json），无法继续跨阶段场景；请检查阶段 1 的结果" % PHASE])
+        return
     if LAST:
         iqa018()
         iqa021_after()
