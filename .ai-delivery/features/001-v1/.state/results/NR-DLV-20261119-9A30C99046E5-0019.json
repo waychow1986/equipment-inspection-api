@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S5",
+  "result": "done",
+  "summary": "按依赖绑定反馈修订 inspection-db 容器声明：新增 container.runAs（postgres:16-alpine 镜像内已有的 postgres 用户 UID 70 / GID 70），数据目录保持在挂载路径 /var/lib/postgresql/data 下的子目录 pgdata（PGDATA）；design.md 外部依赖契约一节补充非 root 运行与数据目录说明；方案其余内容不变。",
+  "asks": [],
+  "outputs": [
+    "docs/dependencies.json",
+    ".ai-delivery/features/001-v1/design.md",
+    ".ai-delivery/features/001-v1/.state/results/NR-DLV-20261119-9A30C99046E5-0019.json"
+  ]
+}

@@ -301,6 +301,11 @@ Coding 会创建或修改的路径（写路径清单）：
 
 唯一外部依赖 `inspection-db` 为标准 PostgreSQL 协议（≥14），使用上文的 schema；`realInstance.dev` 与 `realInstance.test` 均为 true，不需要模拟服务。
 
+平台以容器运行时（`docs/dependencies.json` 的 `container`）：
+- 镜像 `postgres:16-alpine` 默认以 root 启动入口脚本，平台不以 root 运行依赖容器，因此 `runAs` 写出镜像中已有的 `postgres` 用户：UID 70、GID 70（Alpine 版官方镜像固定的数值）。以该用户直接启动时，入口脚本跳过切换用户与 `chown`，直接以 UID 70 执行 `initdb` 与 `postgres`；`/var/run/postgresql` 在镜像中已对所有用户可写。
+- 持久卷挂载在 `/var/lib/postgresql/data`，其根目录经 `fsGroup` 对 GID 70 可写但属主不是 UID 70；`initdb` 要求数据目录属主为自己且权限 0700，所以数据目录 `PGDATA` 设为挂载路径下的子目录 `/var/lib/postgresql/data/pgdata`，由入口脚本以 UID 70 创建。
+- 健康检查为 `pg` 端口（5432）的 TCP 检查；初始化完成、服务器监听后即通过。
+
 ## 安全、隐私、身份与 Secret
 
 ### 身份与授权（FR-017～FR-020、FR-027～FR-029）

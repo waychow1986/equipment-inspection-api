@@ -74,6 +74,10 @@
           "path": "/var/lib/postgresql/data",
           "sizeGi": 2
         },
+        "runAs": {
+          "user": 70,
+          "group": 70
+        },
         "connection": {
           "address": "{{host}}:{{port.pg}}",
           "database": "inspection",
