@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateSubmission } from '../../src/inspections/validation.js';
+import { validateDeviceQuery, validateSubmission } from '../../src/inspections/validation.js';
 
 const valid = { deviceId: 'ASSET-1', storeId: 'STORE-1', conclusion: 'NORMAL' };
 
@@ -87,5 +87,26 @@ describe('validateSubmission', () => {
     for (const body of [undefined, null, 'text', 42, [valid]]) {
       expect(validateSubmission(body)).toEqual({ ok: false, fields: [{ field: 'body', reason: 'MALFORMED' }] });
     }
+  });
+});
+
+describe('validateDeviceQuery', () => {
+  it('accepts a single device id and trims it, ignoring other parameters', () => {
+    expect(validateDeviceQuery({ deviceId: '  ASSET-1 ', storeId: 'STORE-1' })).toEqual({ ok: true, value: 'ASSET-1' });
+    expect(validateDeviceQuery({ deviceId: 'd'.repeat(128) })).toEqual({ ok: true, value: 'd'.repeat(128) });
+  });
+
+  it.each([
+    ['missing', {}, 'REQUIRED'],
+    ['blank', { deviceId: '   ' }, 'REQUIRED'],
+    ['empty', { deviceId: '' }, 'REQUIRED'],
+    ['repeated', { deviceId: ['A', 'B'] }, 'MULTIPLE_VALUES'],
+    ['too long', { deviceId: 'd'.repeat(129) }, 'TOO_LONG'],
+  ])('rejects a %s device id', (_name, query, reason) => {
+    expect(validateDeviceQuery(query)).toEqual({ ok: false, fields: [{ field: 'deviceId', reason }] });
+  });
+
+  it('rejects a missing query object', () => {
+    expect(validateDeviceQuery(undefined)).toEqual({ ok: false, fields: [{ field: 'deviceId', reason: 'REQUIRED' }] });
   });
 });

@@ -1,7 +1,7 @@
 # equipment-inspection-api
 AIDelivery Hub project: 记录门店设备巡检结果的后端服务
 
-TypeScript + Fastify + PostgreSQL 的 HTTP JSON 服务。巡检员凭访问令牌提交巡检结果；记录只追加、不可修改或删除。接口描述见运行中服务的 `GET /openapi.json`（无需令牌）。
+TypeScript + Fastify + PostgreSQL 的 HTTP JSON 服务。巡检员凭访问令牌提交巡检结果，管理人员按设备查询历史记录；记录只追加、不可修改或删除。接口描述见运行中服务的 `GET /openapi.json`（无需令牌）。
 
 ## 本地开发
 
@@ -30,6 +30,7 @@ INSPECTION_DB_SCHEMA=inspection_dev_$RANDOM PORT=8080 node dist/server.js
 | 方法与路径 | 身份 | 说明 |
 |---|---|---|
 | `POST /v1/inspection-records` | 巡检员令牌 | 提交一条巡检结果，字段 `deviceId`、`storeId`、`conclusion`（`NORMAL`/`ABNORMAL`）、可选 `note`；成功返回 201 与记录 |
+| `GET /v1/inspection-records?deviceId=<设备标识>` | 管理人员令牌 | 按设备查询历史记录（不需要门店条件），返回 200 `{"deviceId","records":[...]}`，按提交时间从新到旧；无记录时 `records` 为空列表。`deviceId` 缺少、空白、超过 128 字符或重复出现时 400 |
 | `GET /healthz` | 无 | 数据库可用时 200 `{"status":"ok"}`，否则 503 |
 | `GET /openapi.json` | 无 | OpenAPI 3 接口描述 |
 
@@ -57,7 +58,7 @@ INSPECTION_DB_SCHEMA=inspection_dev_$RANDOM PORT=8080 node dist/server.js
 
 ## 日志
 
-日志为 JSON 行（stdout），字段按白名单输出：访问日志只有 `event`、`requestId`、`method`、路由模板、`statusCode`、`durationMs`、`errorCode`；错误只记录错误名与 `errCode`。日志中不出现令牌、令牌摘要、持有人标识、数据库地址或密码，也不出现设备、门店、结论、备注等记录内容。
+日志为 JSON 行（stdout），字段按白名单输出：访问日志只有 `event`、`requestId`、`method`、路由模板（不含查询字符串）、`statusCode`、`durationMs`、`errorCode`；错误只记录错误名与 `errCode`。日志中不出现令牌、令牌摘要、持有人标识、数据库地址或密码，也不出现设备、门店、结论、备注等记录内容。
 
 ## 运维说明（Runbook）
 

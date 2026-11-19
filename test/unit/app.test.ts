@@ -6,7 +6,7 @@ import { buildApp } from '../../src/app.js';
 import { parseTokenConfig } from '../../src/auth/token-config.js';
 import { parseBearer } from '../../src/auth/authenticate.js';
 import { createLogger } from '../../src/logger.js';
-import type { InspectionRepository, NewInspectionRecord } from '../../src/inspections/repository.js';
+import type { InspectionRecord, InspectionRepository, NewInspectionRecord } from '../../src/inspections/repository.js';
 
 const token = () => randomBytes(32).toString('base64url');
 const digest = (t: string) => createHash('sha256').update(t).digest('hex');
@@ -29,6 +29,8 @@ describe('app (stub repository)', () => {
   const inspector = token();
   const manager = token();
   let inserted: NewInspectionRecord[];
+  let queried: string[];
+  let stored: InspectionRecord[];
   let failWith: Error | undefined;
   let healthy: boolean;
   let logs: string[];
@@ -36,6 +38,8 @@ describe('app (stub repository)', () => {
 
   beforeEach(async () => {
     inserted = [];
+    queried = [];
+    stored = [];
     failWith = undefined;
     healthy = true;
     logs = [];
@@ -44,6 +48,11 @@ describe('app (stub repository)', () => {
         if (failWith) throw failWith;
         inserted.push(rec);
         return { ...rec, submittedAt: '2026-11-19T08:30:12.345Z' };
+      },
+      async listByDevice(deviceId) {
+        if (failWith) throw failWith;
+        queried.push(deviceId);
+        return stored.filter((r) => r.deviceId === deviceId);
       },
     };
     const destination = new Writable({
@@ -232,5 +241,94 @@ describe('app (stub repository)', () => {
     const res = await app.inject({ method: 'GET', url: '/healthz', headers: { 'x-request-id': 'DEV-INJECT' } });
     expect(res.headers['x-request-id']).not.toBe('DEV-INJECT');
     expect(logs.join('')).not.toContain('DEV-INJECT');
+  });
+
+  describe('GET /v1/inspection-records', () => {
+    const query = (headers: Record<string, string>, qs = '') =>
+      app.inject({ method: 'GET', url: `/v1/inspection-records${qs}`, headers });
+    const rec = (deviceId: string, recordId: string, submittedAt: string): InspectionRecord => ({
+      recordId,
+      deviceId,
+      storeId: 'STORE-1',
+      conclusion: 'NORMAL',
+      note: null,
+      inspectorId: 'zhang.san',
+      submittedAt,
+    });
+
+    it('returns the device records for a manager, using the trimmed device id', async () => {
+      stored = [rec('ASSET 1/2', 'r2', '2026-11-19T09:00:00.000Z'), rec('OTHER', 'r9', '2026-11-19T09:00:00.000Z')];
+      const res = await query(auth(manager), '?deviceId=%20ASSET%201%2F2%20&storeId=IGNORED');
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toMatch(/^application\/json/);
+      expect(queried).toEqual(['ASSET 1/2']);
+      expect(res.json()).toEqual({ deviceId: 'ASSET 1/2', records: [stored[0]] });
+    });
+
+    it('returns 200 with an empty list for a device without records', async () => {
+      const res = await query(auth(manager), '?deviceId=NEVER');
+      expect(res.statusCode).toBe(200);
+      expect(res.json()).toEqual({ deviceId: 'NEVER', records: [] });
+    });
+
+    it('returns 401 without or with an unknown token, before validation', async () => {
+      for (const headers of [{}, auth(token())]) {
+        const res = await query(headers, '');
+        expect(res.statusCode).toBe(401);
+        expect(res.headers['www-authenticate']).toBe('Bearer');
+        expect(res.json()).toEqual({ error: { code: 'UNAUTHENTICATED', message: '未识别身份' } });
+      }
+      expect(queried).toHaveLength(0);
+    });
+
+    it('returns 403 for an inspector, before validation', async () => {
+      for (const qs of ['?deviceId=D', '']) {
+        const res = await query(auth(inspector), qs);
+        expect(res.statusCode).toBe(403);
+        expect(res.json()).toEqual({ error: { code: 'FORBIDDEN', message: '无权执行该操作' } });
+      }
+      expect(queried).toHaveLength(0);
+    });
+
+    it.each([
+      ['', 'REQUIRED'],
+      ['?deviceId=', 'REQUIRED'],
+      ['?deviceId=%20%20', 'REQUIRED'],
+      ['?storeId=S', 'REQUIRED'],
+      ['?deviceId=A&deviceId=B', 'MULTIPLE_VALUES'],
+      [`?deviceId=${'d'.repeat(129)}`, 'TOO_LONG'],
+    ])('returns 400 for query %s', async (qs, reason) => {
+      const res = await query(auth(manager), qs);
+      expect(res.statusCode).toBe(400);
+      expect(res.json()).toEqual({
+        error: { code: 'VALIDATION_FAILED', message: '输入不符合要求', fields: [{ field: 'deviceId', reason }] },
+      });
+      expect(queried).toHaveLength(0);
+    });
+
+    it('maps database unavailability to 503', async () => {
+      failWith = Object.assign(new Error('connect ECONNREFUSED 10.0.0.1:5432'), { code: 'ECONNREFUSED' });
+      const res = await query(auth(manager), '?deviceId=D');
+      expect(res.statusCode).toBe(503);
+      expect(res.json()).toEqual({ error: { code: 'SERVICE_UNAVAILABLE', message: '服务暂不可用' } });
+    });
+
+    it('logs the route template only, never the query string or record content', async () => {
+      stored = [{ ...rec('DEV-QLOG', 'REC-QLOG', '2026-11-19T09:00:00.000Z'), storeId: 'STORE-QLOG', note: 'NOTE-QLOG' }];
+      await query(auth(manager), '?deviceId=DEV-QLOG');
+      await query(auth(inspector), '?deviceId=DEV-QLOG');
+      const access = logs
+        .flatMap((l) => l.split('\n'))
+        .filter(Boolean)
+        .map((l) => JSON.parse(l) as Record<string, unknown>)
+        .filter((l) => l.event === 'access');
+      expect(access).toHaveLength(2);
+      expect(access[0]).toMatchObject({ method: 'GET', route: '/v1/inspection-records', statusCode: 200 });
+      expect(access[1]).toMatchObject({ statusCode: 403, errorCode: 'FORBIDDEN' });
+      const all = logs.join('');
+      for (const needle of ['DEV-QLOG', 'REC-QLOG', 'STORE-QLOG', 'NOTE-QLOG', 'deviceId=', 'zhang.san', 'wang.wu', manager]) {
+        expect(all).not.toContain(needle);
+      }
+    });
   });
 });

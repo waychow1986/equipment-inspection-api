@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S37",
+  "result": "done",
+  "summary": "完成第 2 批（AC-02～AC-05、AC-07、AC-08），按测试先行实现：新增 GET /v1/inspection-records?deviceId= 查询接口（仅 manager，401→403→400 次序；deviceId 缺少/空白为 REQUIRED、重复为 MULTIPLE_VALUES、超过 128 字符为 TOO_LONG，其他查询参数忽略；无记录返回 200 空列表），仓储新增 listByDevice（按 submitted_at DESC, seq DESC，命名预编译语句、精确匹配），OpenAPI 补充 listInspectionRecordsByDevice 操作（内联 query 参数）与 MULTIPLE_VALUES 原因，README 补充查询接口说明。新增测试：单元（查询校验、路由 200/401/403/400/503、访问日志不含查询字符串、OpenAPI get 操作）、集成（真实 PostgreSQL 上的排序、同一时刻按插入顺序倒序、设备隔离、空列表、精确匹配）、功能（真实进程 + PostgreSQL：IQA-001～007、009～017、IQA-018 重启前后结果完全一致、IQA-020/021 收回 I2 后 401 且其已有记录不变、FR-028 新增令牌重新加载后生效、通过 OpenAPI 发现查询入口，以及覆盖多次重启的全部日志零命中检查，含 deviceId 查询字符串）。在 Agent Pod 中 lint、typecheck、build、单元 86 项、集成 12 项、功能 34 项全部通过；镜像构建无 Docker 守护进程，本地未验证，候选结果以平台 Runner 为准。第 1 批审查的三项非阻断意见（迁移授权非事务、输入含 NUL 返回 500、conclusion 被 trim）不在本批范围，未改动。",
+  "asks": [],
+  "outputs": [
+    "src/inspections/validation.ts",
+    "src/inspections/repository.ts",
+    "src/inspections/routes.ts",
+    "src/openapi/document.ts",
+    "test/unit/validation.test.ts",
+    "test/unit/app.test.ts",
+    "test/unit/openapi.test.ts",
+    "test/integration/db.test.ts",
+    "test/functional/query.test.ts",
+    "README.md",
+    ".ai-delivery/features/001-v1/.state/results/NR-DLV-20261119-9A30C99046E5-0037.json"
+  ]
+}

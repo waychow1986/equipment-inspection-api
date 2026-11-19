@@ -61,6 +61,43 @@ export const openApiDocument = {
           '503': errorResponse('服务暂不可用（SERVICE_UNAVAILABLE）'),
         },
       },
+      get: {
+        operationId: 'listInspectionRecordsByDevice',
+        summary: '按设备查询历史巡检记录（list inspection records by device）',
+        description:
+          '仅管理人员（manager）可调用；只按设备标识查询，不需要门店条件。记录按提交时间从新到旧排列；无记录时返回空列表。',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'deviceId',
+            in: 'query',
+            required: true,
+            description: '设备标识（只能出现一次）',
+            schema: { type: 'string', minLength: 1, maxLength: 128 },
+          },
+        ],
+        responses: {
+          '200': {
+            description: '该设备的全部记录（从新到旧）',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['deviceId', 'records'],
+                  properties: {
+                    deviceId: { type: 'string', description: '查询的设备标识' },
+                    records: { type: 'array', items: { $ref: '#/components/schemas/InspectionRecord' } },
+                  },
+                },
+              },
+            },
+          },
+          '400': errorResponse('输入不符合要求（VALIDATION_FAILED：deviceId 缺少、空白、过长或重复）'),
+          '401': errorResponse('未识别身份（UNAUTHENTICATED）'),
+          '403': errorResponse('无权执行该操作（FORBIDDEN）'),
+          '503': errorResponse('服务暂不可用（SERVICE_UNAVAILABLE）'),
+        },
+      },
     },
     '/healthz': {
       get: {
@@ -128,7 +165,15 @@ export const openApiDocument = {
                     field: { type: 'string', enum: ['deviceId', 'storeId', 'conclusion', 'note', 'body'] },
                     reason: {
                       type: 'string',
-                      enum: ['REQUIRED', 'INVALID_TYPE', 'INVALID_VALUE', 'TOO_LONG', 'MALFORMED', 'TOO_LARGE'],
+                      enum: [
+                        'REQUIRED',
+                        'INVALID_TYPE',
+                        'INVALID_VALUE',
+                        'TOO_LONG',
+                        'MULTIPLE_VALUES',
+                        'MALFORMED',
+                        'TOO_LARGE',
+                      ],
                     },
                   },
                 },

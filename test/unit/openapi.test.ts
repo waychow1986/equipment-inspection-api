@@ -43,6 +43,39 @@ describe('OpenAPI document', () => {
     expect(Object.keys(post.responses as Json).sort()).toEqual(['201', '400', '401', '403', '413', '503']);
   });
 
+  it('describes the query operation with an inline deviceId query parameter', () => {
+    const get = (paths['/v1/inspection-records'] as Json).get as Json;
+    expect(Object.keys(paths['/v1/inspection-records'] as Json).sort()).toEqual(['get', 'post']);
+    expect(get.operationId).toBe('listInspectionRecordsByDevice');
+    expect(get.summary).toContain('按设备查询历史巡检记录（list inspection records by device）');
+    expect(get.security).toEqual([{ bearerAuth: [] }]);
+    const params = get.parameters as Json[];
+    expect(params).toHaveLength(1);
+    expect(params[0]).toMatchObject({
+      name: 'deviceId',
+      in: 'query',
+      required: true,
+      schema: { type: 'string', minLength: 1, maxLength: 128 },
+    });
+    expect(JSON.stringify(params)).not.toMatch(/\$ref|oneOf|anyOf/);
+    const responses = get.responses as Record<string, Json>;
+    expect(Object.keys(responses).sort()).toEqual(['200', '400', '401', '403', '503']);
+    const okSchema = ((responses['200']?.content as Json)['application/json'] as Json).schema as Json;
+    expect(okSchema).toMatchObject({
+      type: 'object',
+      required: ['deviceId', 'records'],
+      properties: {
+        deviceId: { type: 'string' },
+        records: { type: 'array', items: { $ref: '#/components/schemas/InspectionRecord' } },
+      },
+    });
+  });
+
+  it('lists MULTIPLE_VALUES among the error reasons', () => {
+    const text = JSON.stringify((doc.components as Json).schemas);
+    expect(text).toContain('MULTIPLE_VALUES');
+  });
+
   it('contains no credentials or example tokens', () => {
     const text = JSON.stringify(doc);
     expect(text).not.toMatch(/[0-9a-f]{64}/);

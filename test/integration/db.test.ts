@@ -150,3 +150,63 @@ describe('append-only trigger (owner)', () => {
     await expectSqlState(repo.insert({ ...base, recordId: id }), '23505');
   });
 });
+
+describe('listByDevice', () => {
+  const base = { storeId: 'IT-STORE-Q', conclusion: 'NORMAL' as const, note: null, inspectorId: 'it.q' };
+
+  it('returns only the requested device, newest first, with all seven fields', async () => {
+    const repo = createPgRepository(pool, schema);
+    const device = `IT-Q-${randomUUID()}`;
+    const first = await repo.insert({ ...base, recordId: randomUUID(), deviceId: device, note: '第一次' });
+    const other = await repo.insert({ ...base, recordId: randomUUID(), deviceId: `${device}-OTHER` });
+    const second = await repo.insert({ ...base, recordId: randomUUID(), deviceId: device, conclusion: 'ABNORMAL' });
+    const list = await repo.listByDevice(device);
+    expect(list).toEqual([second, first]);
+    expect(list.every((r) => r.deviceId === device)).toBe(true);
+    expect(list.map((r) => r.recordId)).not.toContain(other.recordId);
+    expect(await repo.listByDevice(`${device}-OTHER`)).toEqual([other]);
+  });
+
+  it('returns an empty list for a device without records', async () => {
+    const repo = createPgRepository(pool, schema);
+    expect(await repo.listByDevice(`IT-NONE-${randomUUID()}`)).toEqual([]);
+  });
+
+  it('matches the device id exactly (case and wildcards are not interpreted)', async () => {
+    const repo = createPgRepository(pool, schema);
+    const device = `IT-Ex-${randomUUID()}`;
+    await repo.insert({ ...base, recordId: randomUUID(), deviceId: device });
+    expect(await repo.listByDevice(device.toUpperCase())).toEqual([]);
+    expect(await repo.listByDevice(`${device.slice(0, -2)}%`)).toEqual([]);
+    expect(await repo.listByDevice(device)).toHaveLength(1);
+  });
+
+  it('orders records with identical submission times by insertion order, latest first', async () => {
+    const repo = createPgRepository(pool, schema);
+    const device = `IT-TIE-${randomUUID()}`;
+    const ids = [randomUUID(), randomUUID(), randomUUID()];
+    await withOwner(async (c) => {
+      const t = `${c.escapeIdentifier(schema)}.inspection_record`;
+      for (const id of ids) {
+        await c.query(
+          `INSERT INTO ${t} (record_id, device_id, store_id, conclusion, note, inspector_id, submitted_at)
+           VALUES ($1, $2, 'S', 'NORMAL', NULL, 'h', '2026-11-19T09:00:00.001Z')`,
+          [id, device],
+        );
+      }
+      await c.query(
+        `INSERT INTO ${t} (record_id, device_id, store_id, conclusion, note, inspector_id, submitted_at)
+         VALUES ($1, $2, 'S', 'NORMAL', NULL, 'h', '2026-11-19T08:00:00.000Z')`,
+        [randomUUID(), device],
+      );
+    });
+    const list = await repo.listByDevice(device);
+    expect(list.map((r) => r.recordId).slice(0, 3)).toEqual([...ids].reverse());
+    expect(list.map((r) => r.submittedAt)).toEqual([
+      '2026-11-19T09:00:00.001Z',
+      '2026-11-19T09:00:00.001Z',
+      '2026-11-19T09:00:00.001Z',
+      '2026-11-19T08:00:00.000Z',
+    ]);
+  });
+});

@@ -7,7 +7,14 @@ export interface SubmissionInput {
   note: string | null;
 }
 
-export type FieldReason = 'REQUIRED' | 'INVALID_TYPE' | 'INVALID_VALUE' | 'TOO_LONG' | 'MALFORMED' | 'TOO_LARGE';
+export type FieldReason =
+  | 'REQUIRED'
+  | 'INVALID_TYPE'
+  | 'INVALID_VALUE'
+  | 'TOO_LONG'
+  | 'MULTIPLE_VALUES'
+  | 'MALFORMED'
+  | 'TOO_LARGE';
 
 export interface FieldError {
   field: string;
@@ -53,6 +60,15 @@ function requiredString(
     return undefined;
   }
   return value;
+}
+
+/** Validates the `deviceId` query parameter (INT-002); other query parameters are ignored. */
+export function validateDeviceQuery(query: unknown): { ok: true; value: string } | { ok: false; fields: FieldError[] } {
+  const raw = isPlainObject(query) ? query.deviceId : undefined;
+  if (Array.isArray(raw)) return { ok: false, fields: [{ field: 'deviceId', reason: 'MULTIPLE_VALUES' }] };
+  const fields: FieldError[] = [];
+  const value = requiredString({ deviceId: raw }, 'deviceId', LIMITS.deviceId, fields);
+  return value === undefined ? { ok: false, fields } : { ok: true, value };
 }
 
 export function validateSubmission(body: unknown): ValidationResult {
