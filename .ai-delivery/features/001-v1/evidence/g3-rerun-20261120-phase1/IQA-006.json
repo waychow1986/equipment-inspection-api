@@ -1,0 +1,100 @@
+{
+  "scenario": "IQA-006",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "前置：D6 两条、D7 一条提交被接受",
+      "passed": true,
+      "observation": "HTTP 201 {\"recordId\":\"0e8e9c1b-e940-4bc7-9d73-eca05ab90962\",\"deviceId\":\"qajusv0ymx-D6\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R6a-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:41.598Z\"} | HTTP 201 {\"recordId\":\"cf9e40ea-deec-4748-bdd6-458ee5e0564f\",\"deviceId\":\"qajusv0ymx-D6\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qajusv0ymx-R6b-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:41.631Z\"} | HTTP 201 {\"recordId\":\"03c70492-8049-4516-aeb5-53a548a37ff5\",\"deviceId\":\"qajusv0ymx-D7\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R7-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:41.663Z\"}",
+      "kind": null
+    },
+    {
+      "step": "只凭设备标识查询 D6 成功且恰好 2 条",
+      "passed": true,
+      "observation": "HTTP 200 {\"deviceId\":\"qajusv0ymx-D6\",\"records\":[{\"recordId\":\"cf9e40ea-deec-4748-bdd6-458ee5e0564f\",\"deviceId\":\"qajusv0ymx-D6\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qajusv0ymx-R6b-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:41.631Z\"},{\"recordId\":\"0e8e9c1b-e940-4bc7-9",
+      "kind": null
+    },
+    {
+      "step": "每条设备=D6，且不含 D7 记录",
+      "passed": true,
+      "observation": "devices=['qajusv0ymx-D6', 'qajusv0ymx-D6']",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-20T02:38:41.601436+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qajusv0ymx-D6\", \"storeId\": \"qajusv0ymx-S1\", \"conclusion\": \"NORMAL\", \"note\": \"qajusv0ymx-R6a-备注\"}",
+      "status": 201,
+      "responseHeaders": {
+        "x-request-id": "421b0420-09bd-4983-ab5f-2d06b69bfef6",
+        "location": "/v1/inspection-records?deviceId=qajusv0ymx-D6",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "229",
+        "date": "Fri, 20 Nov 2026 02:38:41 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"recordId\":\"0e8e9c1b-e940-4bc7-9d73-eca05ab90962\",\"deviceId\":\"qajusv0ymx-D6\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R6a-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:41.598Z\"}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T02:38:41.634700+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qajusv0ymx-D6\", \"storeId\": \"qajusv0ymx-S1\", \"conclusion\": \"ABNORMAL\", \"note\": \"qajusv0ymx-R6b-备注\"}",
+      "status": 201,
+      "responseHeaders": {
+        "x-request-id": "622b9ecf-f270-4260-805f-9ec2cca73064",
+        "location": "/v1/inspection-records?deviceId=qajusv0ymx-D6",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "231",
+        "date": "Fri, 20 Nov 2026 02:38:41 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"recordId\":\"cf9e40ea-deec-4748-bdd6-458ee5e0564f\",\"deviceId\":\"qajusv0ymx-D6\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qajusv0ymx-R6b-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:41.631Z\"}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T02:38:41.666759+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qajusv0ymx-D7\", \"storeId\": \"qajusv0ymx-S1\", \"conclusion\": \"NORMAL\", \"note\": \"qajusv0ymx-R7-备注\"}",
+      "status": 201,
+      "responseHeaders": {
+        "x-request-id": "5386d976-09b0-4564-9956-257f905f6f55",
+        "location": "/v1/inspection-records?deviceId=qajusv0ymx-D7",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "228",
+        "date": "Fri, 20 Nov 2026 02:38:41 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"recordId\":\"03c70492-8049-4516-aeb5-53a548a37ff5\",\"deviceId\":\"qajusv0ymx-D7\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R7-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:41.663Z\"}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T02:38:41.722071+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qajusv0ymx-D6",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "80f6106b-6472-4211-baaa-4ebb2908df76",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "502",
+        "date": "Fri, 20 Nov 2026 02:38:41 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qajusv0ymx-D6\",\"records\":[{\"recordId\":\"cf9e40ea-deec-4748-bdd6-458ee5e0564f\",\"deviceId\":\"qajusv0ymx-D6\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qajusv0ymx-R6b-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:41.631Z\"},{\"recordId\":\"0e8e9c1b-e940-4bc7-9d73-eca05ab90962\",\"deviceId\":\"qajusv0ymx-D6\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R6a-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:41.598Z\"}]}",
+      "error": null
+    }
+  ]
+}

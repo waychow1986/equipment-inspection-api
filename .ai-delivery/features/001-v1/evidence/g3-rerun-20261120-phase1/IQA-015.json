@@ -1,0 +1,57 @@
+{
+  "scenario": "IQA-015",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "M1 提交被拒绝为无权执行该操作(403)",
+      "passed": true,
+      "observation": "HTTP 403 {\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"无权执行该操作\"}}",
+      "kind": null
+    },
+    {
+      "step": "M1 查询 D14 为空",
+      "passed": true,
+      "observation": "M1 查询 qajusv0ymx-D14: HTTP 200; 记录数=0",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-20T02:38:42.509079+00:00",
+      "caller": "M1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qajusv0ymx-D14\", \"storeId\": \"qajusv0ymx-S1\", \"conclusion\": \"NORMAL\", \"note\": \"qajusv0ymx-R14-备注\"}",
+      "status": 403,
+      "responseHeaders": {
+        "x-request-id": "fd7b68a0-9f27-4e8f-acf0-5c0be7aaeaf6",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "64",
+        "date": "Fri, 20 Nov 2026 02:38:42 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"无权执行该操作\"}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T02:38:42.552971+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qajusv0ymx-D14",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "2be67dc7-ba0d-40f1-b4e4-7b262b5d9cb5",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "42",
+        "date": "Fri, 20 Nov 2026 02:38:42 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qajusv0ymx-D14\",\"records\":[]}",
+      "error": null
+    }
+  ]
+}
