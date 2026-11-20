@@ -1,0 +1,70 @@
+{
+  "scenario": "IQA-008",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定",
+    "A-9"
+  ],
+  "checkpoints": [
+    {
+      "step": "缺少设备标识：被拒绝为输入不符合要求",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "缺少设备标识：指明设备标识",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "设备标识为空白：被拒绝为输入不符合要求",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "设备标识为空白：指明设备标识",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-20T00:14:10.036794+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"storeId\": \"qaskeg7hzo-S1\", \"conclusion\": \"NORMAL\", \"note\": \"qaskeg7hzo-R8-备注\"}",
+      "status": 400,
+      "responseHeaders": {
+        "x-request-id": "317ec85a-025a-4ca5-97b1-8fb7e3b837ee",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "124",
+        "date": "Fri, 20 Nov 2026 00:14:10 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T00:14:10.089878+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"   \", \"storeId\": \"qaskeg7hzo-S1\", \"conclusion\": \"NORMAL\", \"note\": \"qaskeg7hzo-R8-备注\"}",
+      "status": 400,
+      "responseHeaders": {
+        "x-request-id": "4805a8c2-ded9-47e7-b9c5-1442ce81f3b6",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "124",
+        "date": "Fri, 20 Nov 2026 00:14:10 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}}",
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "run": "qaskeg7hzo",
+  "phase": 1,
+  "phases": 2,
+  "candidateSha": "aec3f96f2e4d131d246eebcf02a147508e1dcdb8",
+  "serviceVar": "AIDH_SERVICE_INSPECTION_API_URL",
+  "api": {
+    "submit": "/v1/inspection-records",
+    "query": "/v1/inspection-records?deviceId={d}",
+    "fields": {
+      "device": "deviceId",
+      "store": "storeId",
+      "conclusion": "conclusion",
+      "remark": "note"
+    },
+    "values": {
+      "正常": "NORMAL",
+      "异常": "ABNORMAL"
+    },
+    "source": "openapi",
+    "openapiSubmit": [
+      "/v1/inspection-records",
+      {
+        "device": "deviceId",
+        "store": "storeId",
+        "conclusion": "conclusion",
+        "remark": "note"
+      }
+    ],
+    "openapiQuery": [
+      "/v1/inspection-records?deviceId={d}"
+    ]
+  },
+  "discovery": "/openapi.json",
+  "envNotes": [],
+  "assumptionsByScenario": {
+    "IQA-001": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定",
+      "A-10"
+    ],
+    "IQA-002": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-003": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定",
+      "A-8",
+      "A-10"
+    ],
+    "IQA-004": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定",
+      "A-8"
+    ],
+    "IQA-005": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-006": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-007": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-008": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定",
+      "A-9"
+    ],
+    "IQA-009": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-010": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-011": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-012": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-013": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-014": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-015": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-016": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+    ],
+    "IQA-017": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定",
+      "A-9"
+    ],
+    "IQA-021": [
+      "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定",
+      "A-12"
+    ]
+  },
+  "finishedAt": "2026-11-20T00:14:11.572377+00:00"
+}
