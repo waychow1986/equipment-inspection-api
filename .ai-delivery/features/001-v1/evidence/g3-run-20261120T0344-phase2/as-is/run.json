@@ -1,0 +1,18 @@
+{
+  "run": null,
+  "phase": 2,
+  "phases": 2,
+  "candidateSha": "794c04968859b952fd222631c9564f9ea648edc5",
+  "serviceVar": "AIDH_SERVICE_INSPECTION_API_URL",
+  "api": {
+    "submit": null,
+    "query": null,
+    "fields": {},
+    "values": {},
+    "source": null
+  },
+  "discovery": null,
+  "envNotes": [],
+  "assumptionsByScenario": {},
+  "finishedAt": "2026-11-20T03:44:37.805766+00:00"
+}

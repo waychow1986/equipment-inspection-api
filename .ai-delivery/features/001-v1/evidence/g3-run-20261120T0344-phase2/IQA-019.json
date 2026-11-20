@@ -1,0 +1,16 @@
+{
+  "scenario": "IQA-019",
+  "phase": 2,
+  "assumptions": [
+    "A-13"
+  ],
+  "checkpoints": [
+    {
+      "step": "可读取服务日志",
+      "passed": false,
+      "observation": "未注入机密 QA_SERVICE_LOG_URL（A-13，环境/平台问题）",
+      "kind": "gap"
+    }
+  ],
+  "requests": []
+}

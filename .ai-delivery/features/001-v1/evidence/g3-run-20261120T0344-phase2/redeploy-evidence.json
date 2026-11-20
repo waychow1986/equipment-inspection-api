@@ -1,0 +1,1 @@
+[{"startedAt":"2026-11-20T03:43:15.588945209Z","deployedAt":"2026-11-20T03:43:24.905887862Z","pods":[{"name":"inspection-api-68d7fd79c4-b6q5c","service":"inspection-api","createdAt":"2026-11-20T03:43:15Z","phase":"Running"}],"allPodsCreatedByThisRedeploy":true,"sequence":1}]
