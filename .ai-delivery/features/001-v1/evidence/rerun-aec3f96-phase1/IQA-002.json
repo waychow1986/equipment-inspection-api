@@ -1,0 +1,70 @@
+{
+  "scenario": "IQA-002",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "I1 提交 D2（无备注）被接受",
+      "passed": true,
+      "observation": "HTTP 201 {\"recordId\":\"50c5e696-1887-4661-a207-07f4d64b504d\",\"deviceId\":\"qaskeg7hzo-D2\",\"storeId\":\"qaskeg7hzo-S1\",\"conclusion\":\"NORMAL\",\"note\":null,\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T00:14:06.129Z\"}",
+      "kind": null
+    },
+    {
+      "step": "M1 查询 D2 恰好 1 条",
+      "passed": true,
+      "observation": "M1 查询 qaskeg7hzo-D2: HTTP 200, 记录数=1（期望 1）",
+      "kind": null
+    },
+    {
+      "step": "结论=正常",
+      "passed": true,
+      "observation": "NORMAL",
+      "kind": null
+    },
+    {
+      "step": "备注为空",
+      "passed": true,
+      "observation": "remark=None",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-20T00:14:06.133077+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qaskeg7hzo-D2\", \"storeId\": \"qaskeg7hzo-S1\", \"conclusion\": \"NORMAL\"}",
+      "status": 201,
+      "responseHeaders": {
+        "x-request-id": "808e28dd-a4b0-4afd-bb2a-7e902bed674a",
+        "location": "/v1/inspection-records?deviceId=qaskeg7hzo-D2",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "210",
+        "date": "Fri, 20 Nov 2026 00:14:06 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"recordId\":\"50c5e696-1887-4661-a207-07f4d64b504d\",\"deviceId\":\"qaskeg7hzo-D2\",\"storeId\":\"qaskeg7hzo-S1\",\"conclusion\":\"NORMAL\",\"note\":null,\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T00:14:06.129Z\"}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T00:14:06.187019+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qaskeg7hzo-D2",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "cdd247c1-2f54-4a63-8521-bfed190a77ba",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "251",
+        "date": "Fri, 20 Nov 2026 00:14:06 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qaskeg7hzo-D2\",\"records\":[{\"recordId\":\"50c5e696-1887-4661-a207-07f4d64b504d\",\"deviceId\":\"qaskeg7hzo-D2\",\"storeId\":\"qaskeg7hzo-S1\",\"conclusion\":\"NORMAL\",\"note\":null,\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T00:14:06.129Z\"}]}",
+      "error": null
+    }
+  ]
+}

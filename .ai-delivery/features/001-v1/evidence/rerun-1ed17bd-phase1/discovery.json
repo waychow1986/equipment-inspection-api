@@ -1,0 +1,131 @@
+{
+  "api": {
+    "submit": "/v1/inspection-records",
+    "query": "/v1/inspection-records?deviceId={d}",
+    "fields": {
+      "device": "deviceId",
+      "store": "storeId",
+      "conclusion": "conclusion",
+      "remark": "note"
+    },
+    "values": {
+      "正常": "NORMAL",
+      "异常": "ABNORMAL"
+    },
+    "source": "openapi",
+    "openapiSubmit": [
+      "/v1/inspection-records",
+      {
+        "device": "deviceId",
+        "store": "storeId",
+        "conclusion": "conclusion",
+        "remark": "note"
+      }
+    ],
+    "openapiQuery": [
+      "/v1/inspection-records?deviceId={d}"
+    ]
+  },
+  "openapi": "/openapi.json",
+  "steps": [
+    {
+      "openapiSubmitCandidates": [
+        "/v1/inspection-records"
+      ],
+      "openapiQueryCandidates": [
+        "/v1/inspection-records?deviceId={d}"
+      ]
+    },
+    {
+      "queryProbe": "/v1/inspection-records?deviceId={d}",
+      "status": 200
+    },
+    {
+      "submitProbe": "/v1/inspection-records",
+      "fields": [
+        "deviceId",
+        "storeId",
+        "conclusion",
+        "note"
+      ],
+      "value": "NORMAL",
+      "status": 201
+    },
+    {
+      "abnormalValueProbe": "ABNORMAL",
+      "status": 201
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-19T22:04:17.005578+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qazru1xczs-PROBE",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "ed974eea-b518-43d6-a977-95a72331f9f2",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "44",
+        "date": "Thu, 19 Nov 2026 22:04:17 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qazru1xczs-PROBE\",\"records\":[]}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T22:04:17.039598+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"storeId\": \"qazru1xczs-S0\", \"conclusion\": \"NORMAL\", \"note\": \"qazru1xczs-PROBE-probe1\", \"deviceId\": \"qazru1xczs-PROBE\"}",
+      "status": 201,
+      "responseHeaders": {
+        "x-request-id": "ef0c1017-6f85-40f1-8291-5372ded836fc",
+        "location": "/v1/inspection-records?deviceId=qazru1xczs-PROBE",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "234",
+        "date": "Thu, 19 Nov 2026 22:04:17 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"recordId\":\"8327b0bd-676f-4e81-92b7-58875ee1bc2b\",\"deviceId\":\"qazru1xczs-PROBE\",\"storeId\":\"qazru1xczs-S0\",\"conclusion\":\"NORMAL\",\"note\":\"qazru1xczs-PROBE-probe1\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-19T22:04:17.036Z\"}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T22:04:17.054950+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qazru1xczs-PROBE",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "0de644be-f1c8-4411-abb4-b3fded7ca339",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "278",
+        "date": "Thu, 19 Nov 2026 22:04:17 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qazru1xczs-PROBE\",\"records\":[{\"recordId\":\"8327b0bd-676f-4e81-92b7-58875ee1bc2b\",\"deviceId\":\"qazru1xczs-PROBE\",\"storeId\":\"qazru1xczs-S0\",\"conclusion\":\"NORMAL\",\"note\":\"qazru1xczs-PROBE-probe1\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-19T22:04:17.036Z\"}]}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T22:04:17.079963+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"storeId\": \"qazru1xczs-S0\", \"conclusion\": \"ABNORMAL\", \"note\": \"qazru1xczs-PROBE-probe1-a\", \"deviceId\": \"qazru1xczs-PROBE\"}",
+      "status": 201,
+      "responseHeaders": {
+        "x-request-id": "44eff1f4-d5c8-4d40-a0f2-239b66c5d9da",
+        "location": "/v1/inspection-records?deviceId=qazru1xczs-PROBE",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "238",
+        "date": "Thu, 19 Nov 2026 22:04:17 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"recordId\":\"e9542ccd-eb51-4eb6-b825-ccc34ac93ba1\",\"deviceId\":\"qazru1xczs-PROBE\",\"storeId\":\"qazru1xczs-S0\",\"conclusion\":\"ABNORMAL\",\"note\":\"qazru1xczs-PROBE-probe1-a\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-19T22:04:17.077Z\"}",
+      "error": null
+    }
+  ]
+}

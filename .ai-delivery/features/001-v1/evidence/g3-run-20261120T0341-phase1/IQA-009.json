@@ -1,0 +1,92 @@
+{
+  "scenario": "IQA-009",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "缺少巡检结论：被拒绝为输入不符合要求",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"conclusion\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "缺少巡检结论：指明巡检结论",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"conclusion\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "结论为空串：被拒绝为输入不符合要求",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"conclusion\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "结论为空串：指明巡检结论",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"conclusion\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "M1 查询 D9 为空",
+      "passed": true,
+      "observation": "M1 查询 qa6vbzj2hg-D9: HTTP 200; 记录数=0",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-20T03:42:18.690274+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qa6vbzj2hg-D9\", \"storeId\": \"qa6vbzj2hg-S1\", \"note\": \"qa6vbzj2hg-R9-备注\"}",
+      "status": 400,
+      "responseHeaders": {
+        "x-request-id": "83e6ed46-989e-44fa-a4e2-a91e78001ae0",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "126",
+        "date": "Fri, 20 Nov 2026 03:42:18 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"conclusion\",\"reason\":\"REQUIRED\"}]}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T03:42:18.724440+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qa6vbzj2hg-D9\", \"storeId\": \"qa6vbzj2hg-S1\", \"conclusion\": \"\", \"note\": \"qa6vbzj2hg-R9-备注\"}",
+      "status": 400,
+      "responseHeaders": {
+        "x-request-id": "26a819cf-5bee-4d9b-a0f8-00c237c3373b",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "126",
+        "date": "Fri, 20 Nov 2026 03:42:18 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"conclusion\",\"reason\":\"REQUIRED\"}]}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T03:42:18.755959+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qa6vbzj2hg-D9",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "793b6870-5097-4c81-9984-0f8a26de315c",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "41",
+        "date": "Fri, 20 Nov 2026 03:42:18 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qa6vbzj2hg-D9\",\"records\":[]}",
+      "error": null
+    }
+  ]
+}

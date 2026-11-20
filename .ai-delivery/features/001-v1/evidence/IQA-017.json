@@ -1,0 +1,75 @@
+{
+  "scenario": "IQA-017",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定",
+    "A-9"
+  ],
+  "checkpoints": [
+    {
+      "step": "至少一种不指定设备的查询被拒绝为输入不符合要求并指明设备标识",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}} | HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}} | HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "这些查询都不返回巡检记录",
+      "passed": true,
+      "observation": "HTTP 400 | HTTP 400 | HTTP 400",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-19T21:58:27.249045+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": null,
+      "status": 400,
+      "responseHeaders": {
+        "x-request-id": "e920e028-6011-4d3c-ba8e-0791b94aa367",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "124",
+        "date": "Thu, 19 Nov 2026 21:58:27 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T21:58:27.279101+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=",
+      "requestBody": null,
+      "status": 400,
+      "responseHeaders": {
+        "x-request-id": "15cadd38-dbe4-4830-abf0-1521969be47f",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "124",
+        "date": "Thu, 19 Nov 2026 21:58:27 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T21:58:27.295211+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=%20",
+      "requestBody": null,
+      "status": 400,
+      "responseHeaders": {
+        "x-request-id": "e57f5578-78c6-4e8d-85c3-0a5d297f2ec6",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "124",
+        "date": "Thu, 19 Nov 2026 21:58:27 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"deviceId\",\"reason\":\"REQUIRED\"}]}}",
+      "error": null
+    }
+  ]
+}

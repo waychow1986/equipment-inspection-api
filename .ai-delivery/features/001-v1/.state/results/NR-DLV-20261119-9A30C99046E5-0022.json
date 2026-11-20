@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S6",
+  "result": "done",
+  "summary": "G2 技术部分已退回，本次重新计划：先重做技术方案（按人工决定改用应用机密令牌方案 A、提供 /openapi.json、拆分数据库最小权限角色、IQA-019 记为测试缺口、README 写明运维登记与收回令牌），再细化计划，之后分两批编码，每批后接代码审查；维持标准档，会话预算建议上调到 36 次、12 小时。",
+  "asks": [],
+  "outputs": [
+    ".ai-delivery/features/001-v1/.state/results/NR-DLV-20261119-9A30C99046E5-0022.json"
+  ],
+  "plan": {
+    "schemaVersion": 1,
+    "steps": [
+      {"id": "S22", "capability": "solution", "zone": "design", "dependsOn": []},
+      {"id": "S23", "capability": "plan", "zone": "design", "dependsOn": ["S22"]},
+      {"id": "S24", "capability": "code", "zone": "build", "dependsOn": [], "batch": 1},
+      {"id": "S25", "capability": "review", "zone": "build", "dependsOn": ["S24"], "batch": 1},
+      {"id": "S26", "capability": "code", "zone": "build", "dependsOn": ["S25"], "batch": 2},
+      {"id": "S27", "capability": "review", "zone": "build", "dependsOn": ["S26"], "batch": 2}
+    ],
+    "omitted": [
+      {"capability": "spec", "reason": "规格 spec.md 两次 G2 都确认忠实于已确认意图，AC-01～AC-08 都有验收场景（IQA-001～IQA-021）。本次退回的五项决定只改技术落地方式（令牌存放、接口发现、数据库角色、日志途径、运维说明），不改产品行为。PQ-003 的人工答案原本就是“机密配置 + 删除后重新加载”，方案 A 与它一致，所以不重做规格。"}
+    ],
+    "batches": [
+      {"n": 1, "criteria": ["AC-01", "AC-06", "AC-08"]},
+      {"n": 2, "criteria": ["AC-02", "AC-03", "AC-04", "AC-05", "AC-07", "AC-08"]}
+    ],
+    "factors": [
+      {"name": "change-size", "lean": "light", "basis": "只有两条业务接口（提交、按设备查询），加 /healthz 和 /openapi.json；改用方案 A 后去掉了令牌登记表和 token-admin CLI，改动更小。没有前端、报表，也没有修改或删除功能。"},
+      {"name": "modules", "lean": "medium", "basis": "全部在一个服务内：配置与启动时加载令牌机密、日志白名单、数据库连接与迁移（含运行角色）、身份与角色钩子、提交与查询路由、OpenAPI 文档；外部依赖只有 inspection-db。"},
+      {"name": "new-or-first", "lean": "heavy", "basis": "全新项目的首个交付。第 1 批要从零搭建工程骨架、Dockerfile、开发者验证命令（runtime/deployment.json），以及连接真实数据库的测试支撑。"},
+      {"name": "risk", "lean": "medium", "basis": "新库只有向前的初始迁移，没有存量数据要迁移。但涉及令牌摘要机密、数据库最小权限拆分、日志中不得出现凭据或记录内容（AC-08），以及记录只增不改，需要每批单独审查。"}
+    ],
+    "tier": "standard",
+    "budget": {"revisions": 4, "sessions": 36, "hours": 12.0},
+    "items": [
+      {"category": "business", "question": "会话预算是否从 30 次、10 小时上调？本次 S6 已是第 22 次运行。剩余最低路径为技术方案重做、细化计划、G2、测试计划节点、两批编码与审查（4 次）、G3、G4、G5，至少 11 次，合计约 33 次，已超过 30 次。如果再有一次批次退回（编码加审查 2 次）或一次需要人回答后继续，还需要更多。G2 曾建议 34 次、12 小时，那是在本轮退回之前提出的。", "recommended": "上调到 36 次会话、12 小时，修订次数 4 次不变。", "alternatives": ["上调到 34 次、12 小时（G2 的建议）：只够最低路径，外加约 1 次余量。", "维持 30 次、10 小时：按最低路径也会在 G4 或 G5 之前耗尽预算。"]}
+    ],
+    "reason": "G2 技术部分退回，由人做出五项决定，所以先排一次技术方案重做（S22），再排一次细化计划（S23）。S22 要完成：① 令牌改用方案 A。“令牌摘要—持有人标识—角色”清单作为服务的应用机密注入，服务启动时加载；收回令牌就是修改机密并重新部署。删除 access_token 表、token-admin 和“由独立测试直连数据库登记令牌”的说法。test 环境机密按已锁定的测试计划登记 I1、I2、M1，I1、I2 的持有人标识与 QA_INSPECTOR_*_HOLDER 一致；I2 由运维在两个阶段之间删除，随重新部署生效（A-12）。同步修订 docs/dependencies.json 中的机密说明。② 契约增加无需身份即可访问的 GET /openapi.json（OpenAPI 3），写明两条业务路由、字段、conclusion 枚举、deviceId 参数和响应结构，文档中不含任何凭据或示例令牌。③ 迁移使用所有者账号，服务运行使用只有 inspection_record INSERT/SELECT 权限的角色，并修正 TD-003 的表述。④ 不声明日志导出地址，IQA-019 记为测试缺口，AC-08 以开发者侧对真实进程完整输出的零命中检查作为证据，由 G4 判断。⑤ Runbook 和 README 写明运维登记与收回令牌的步骤。已锁定的测试计划本来就假定令牌在机密配置中、优先读取 /openapi.json，方案 A 和 OpenAPI 正是为了与它对齐，所以不需要为此重写测试计划；测试计划节点和各关口由平台按骨架补入。第 1 批（S24 编码、S25 审查）：工程骨架、config 与启动时令牌机密加载（格式错误则拒绝启动）、日志字段白名单、pg 连接池与启动迁移（只增不改的触发器、最小权限运行角色）、Bearer 身份与角色钩子（401→403→400）、POST 提交与统一错误响应、/healthz、/openapi.json（含提交路由）、Dockerfile、runtime/deployment.json、README 运维说明。验收 AC-01、AC-06、AC-08，并覆盖 401 和 403 拒绝。第 2 批（S26 编码、S27 审查）在第 1 批合入后实现：GET 按设备查询（仅管理人员；结果从新到旧；无记录返回空列表；缺少 deviceId 返回 400；巡检员调用返回 403），在 /openapi.json 中补上查询路由，加上停止并重启进程后仍能查到记录的功能测试，以及从机密中删除令牌并重启后该令牌被拒绝的验证。验收 AC-02～AC-05、AC-07。查询串里带有 deviceId，泄露风险最高，所以 AC-08 在第 2 批再列一次：对包含查询、重启和收回令牌的完整进程输出重新做零命中检查。两批的集成测试和功能测试都连接真实的 dev PostgreSQL，Mock 不作为验收证据。维持标准档：改动小，集中在一个服务，没有存量数据迁移，完整档的额外评审收益有限；但这是新项目的首个交付，又有安全和日志隐私要求，需要两批编码各自审查，不适合只有一批编码的轻量档。预算上调的理由见 items。"
+  }
+}

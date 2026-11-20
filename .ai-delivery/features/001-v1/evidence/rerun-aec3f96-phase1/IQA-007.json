@@ -1,0 +1,40 @@
+{
+  "scenario": "IQA-007",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "查询从未提交过的 D8 返回成功",
+      "passed": true,
+      "observation": "HTTP 200 {\"deviceId\":\"qaskeg7hzo-D8\",\"records\":[]}",
+      "kind": null
+    },
+    {
+      "step": "记录列表为空",
+      "passed": true,
+      "observation": "records=[]",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-20T00:14:10.010643+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qaskeg7hzo-D8",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "97ee17c3-1f08-422d-9ddd-0936e7086729",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "41",
+        "date": "Fri, 20 Nov 2026 00:14:10 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qaskeg7hzo-D8\",\"records\":[]}",
+      "error": null
+    }
+  ]
+}

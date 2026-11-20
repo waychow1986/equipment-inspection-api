@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S5",
+  "result": "done",
+  "summary": "按确定性检查修正部署声明：errorLogRules 两条规则的类别字段由 type 改为 schema 要求的 kind（structured / pattern），design.md 中对应描述同步；方案其余内容不变。",
+  "asks": [],
+  "outputs": [
+    "docs/deployment.json",
+    ".ai-delivery/features/001-v1/design.md",
+    ".ai-delivery/features/001-v1/.state/results/NR-DLV-20261119-9A30C99046E5-0010.json"
+  ]
+}

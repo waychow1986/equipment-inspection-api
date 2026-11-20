@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "stepId": "G2",
+  "result": "done",
+  "summary": "第四次设计评审：自上次 G2 以来只有 S22 改了依赖声明的接入字段命名，S29 加强了测试脚本的 I2 判定；规格仍完整覆盖意图与 AC-01～AC-08，方案、依赖声明、探测脚本与锁定的测试计划彼此一致，关口、批次顺序与档位成立。无阻断问题；上次的非阻断意见（探测 role-privileges 可能误报）仍未处理，两项技术决定仍待人回答。",
+  "asks": [],
+  "outputs": [
+    ".ai-delivery/features/001-v1/.state/results/NR-DLV-20261119-9A30C99046E5-0032.json"
+  ],
+  "review": {
+    "mode": "g2",
+    "conclusion": "可以进入实施区。本次只评审上次 G2（第 0025 次运行）之后的变化（git diff dcb3f96..HEAD），其余内容维持上次结论。① spec.md 没有修改，FR-001～FR-029、IQA-001～IQA-021 仍覆盖 INT-001、INT-002、六项不做的事与 AC-01～AC-08，Q1～Q5、PQ-001～PQ-004 的人工答案都已体现。② S22（第 0030 次运行）把 docs/dependencies.json 的接入字段、连接模板键改为大写 ADDRESS/DATABASE/USERNAME/PASSWORD/SSLMODE，生成机密改名为 DB_PASSWORD，POSTGRES_PASSWORD 与连接模板中的 {{secret.DB_PASSWORD}} 已同步修改。我逐项核对：design.md 配置表（AIDH_DEP_INSPECTION_DB_ADDRESS/DATABASE/USERNAME/PASSWORD/SSLMODE/AUTH_MODE）、Secret 表、外部依赖契约与 deploy/probes/inspection-db.sh 的 env(\"ADDRESS\") 等读取方式一致，没有残留的小写字段或 db-password；依赖声明与探测脚本中没有凭据原文。③ S29（第 0026 次运行）在 G2 之后修改了 tasks-qa.md 与 qa-run.sh：A-1 增加无 OpenAPI 时的回退探测；A-12 改为阶段 1 开始时先用 I2 查询 RUN-PROBE，返回 401 时把依赖 I2 的检查点记为测试缺口；阶段 2 缺少状态文件时也记为测试缺口。按方案的 401→403→400 判定顺序，已登记的 I2 查询返回 403 而不是 401，不会被误判为提前删除；探测只写入 RUN-PROBE，不影响各场景的判定。这些修改都在测试计划步骤的职责内，与方案和规格没有冲突。④ 计划 v7 把实施区重新编号为 S34（测试计划）、S35/S36（第 1 批：AC-01/06/08）、S37/S38（第 2 批：AC-02～05/07/08）。批次内容与 S23 的说明和方案的模块划分一致；S23 结果与 design.md 中的 S30～S33 只是旧编号，内容不变。两批都在真实 dev PostgreSQL 上做集成与功能测试，Mock 不作为验收证据，符合宪章。剩下两项技术决定仍没有人工答案，继续列在 items；一条非阻断意见交 S22。",
+    "items": [
+      {
+        "category": "technical",
+        "question": "test 环境机密由谁、在何时登记和维护？候选部署与独立测试依赖下列 test 值：QA_INSPECTOR_1_TOKEN、QA_INSPECTOR_2_TOKEN、QA_MANAGER_TOKEN、QA_INSPECTOR_1_HOLDER、QA_INSPECTOR_2_HOLDER，以及 INSPECTION_ACCESS_TOKENS 中 I1、I2、M1 的三个条目。缺少 INSPECTION_ACCESS_TOKENS 时，服务按设计拒绝启动（P-1）。I2 没有登记，或在阶段 1 之前就被删除时，S29 修订后的脚本会把 IQA-004、IQA-013、IQA-021 中依赖 I2 的检查点记为测试缺口；I2 没有在两个阶段之间按时删除时，IQA-021 也记为测试缺口（A-12、R-1）。两种情况下 AC 证据都不完整。依据：docs/dependencies.json 的 secrets、design.md 中“独立测试（QA）需要的环境条件”、tasks-qa.md A-12。G2 与 S23 已多次提出这一问题，至今没有人工答案。",
+        "recommended": "技术负责人在第 2 批编码（S37）完成前登记全部 test 值，并指定一名运维在独立测试两个阶段之间删除 I2、测试结束后加回；同时向平台确认候选容器会注入 AIDH_SECRET_INSPECTION_ACCESS_TOKENS，且受控重新部署时读取最新值。",
+        "alternatives": [
+          "G3 通过后再登记：可能让候选部署停下来等人工操作。",
+          "由平台的依赖与机密任务提示并收集这些值，技术负责人收到提示时再提供；I2 的删除与加回仍需指定专人。"
+        ]
+      },
+      {
+        "category": "technical",
+        "question": "是否接受 R-3 作为有理由的例外？服务进程持有数据库所有者凭据，只在启动迁移和授权时使用；处理请求的会话切换到只有 INSERT/SELECT 权限的写入角色，并有触发器拒绝修改和删除。但能控制服务进程或取得所有者凭据的人，仍能改写巡检记录。依据：宪章“执行 least privilege”“记录有充分理由的例外”；design.md TD-003、TD-013、R-3。G2 与 S23 已提出，至今没有人工答案。",
+        "recommended": "接受。平台只为依赖注入一组凭据，部署声明也不支持一次性迁移任务；请求路径已做到最小权限并有触发器保护，残余风险由凭据保护和数据库运维管控承担。",
+        "alternatives": [
+          "不接受：需要平台为迁移和运行分别提供凭据，或支持一次性迁移任务。这超出本交付的平台能力，需要另行提出，并会推迟本交付。"
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "关口齐全（G1～G5）",
+        "ok": true,
+        "note": "计划图 v7 依次含 G1、G2、G3、G4、G5。"
+      },
+      {
+        "name": "设计区步骤都在 G2 之前（规格→技术方案→细化计划）",
+        "ok": true,
+        "note": "S4→S5→S6，以及返工的 S22（solution）→S23（plan），都排在 G2 之前。"
+      },
+      {
+        "name": "测试计划先于编码",
+        "ok": true,
+        "note": "S34（testplan）排在实施区第一位，在 S35 之前。tasks-qa.md 与 qa-run.sh 已在编码前写好；S29 在上次 G2 后做的修改只加强了判定的稳健性，不涉及编码。"
+      },
+      {
+        "name": "编码批次按顺序",
+        "ok": true,
+        "note": "第 1 批 S35→S36，第 2 批 S37 依赖 S36，之后接 S38。"
+      },
+      {
+        "name": "每批编码之后有代码审查",
+        "ok": true,
+        "note": "S35→S36（review），S37→S38（review）。"
+      },
+      {
+        "name": "意图验收标准全部被规格覆盖",
+        "ok": true,
+        "note": "spec.md 未修改；AC-01～AC-08 都有对应的 FR 与 IQA 场景。按人的决定，AC-08 中 IQA-019 一项只有开发者侧证据，交 G4 判断。"
+      },
+      {
+        "name": "技术方案与规格、计划、依赖声明一致",
+        "ok": true,
+        "note": "接入字段的大写命名与 AIDH_DEP_INSPECTION_DB_* 配置表、探测脚本、Secret 表一致；契约与错误顺序和修订后的 qa-run.sh 兼容；批次 1、批次 2 的 AC 划分与模块划分一致。"
+      },
+      {
+        "name": "档位依据（standard）",
+        "ok": true,
+        "note": "新项目的首个交付，涉及凭据、最小权限与日志隐私，需要两批编码各自审查；改动集中在一个服务，没有存量数据迁移，不需要完整档。"
+      },
+      {
+        "name": "预算站得住",
+        "ok": true,
+        "note": "计划 v7 的预算为 42 次会话、14 小时、4 次修订。本次 G2 是第 32 次运行，剩余最低路径为 S34～S38、G3、G4、G5，共 8 次，合计 40 次，只剩 2 次余量，不够一次完整的批次退回（编码加审查加关口）。余量很紧；再有一次设计返工或批次退回，就需要人追加预算。"
+      }
+    ],
+    "findings": [
+      {
+        "ownerStep": "S22",
+        "blocking": false,
+        "text": "（上次 G2 的意见，本次 S22 没有处理）探测的 role-privileges 可能误报为已满足。deploy/probes/inspection-db.sh 的判定仍是 is_super or can_create_role or (writer_exists and is_member)。design.md“写入角色与授权”写明：写入角色已存在、连接用户不是其成员且无权授予时，服务启动失败。PostgreSQL 16 起，只有 CREATEROLE 已不能授予别人创建的角色，还需要该角色的 ADMIN OPTION。因此客户复用实例时（写入角色已由他人创建，连接用户只有 CREATEROLE），探测会报告已满足，服务却在候选部署时以 42501 退出。建议改为：超级用户；或写入角色不存在且有 CREATEROLE；或写入角色已存在，且连接用户是其成员或对其有 ADMIN OPTION。推荐的容器形态下 POSTGRES_USER 是超级用户，不受影响，所以不阻断；在改用客户实例前修正即可。"
+      }
+    ]
+  }
+}

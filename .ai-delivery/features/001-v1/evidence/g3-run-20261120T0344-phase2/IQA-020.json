@@ -1,0 +1,34 @@
+{
+  "scenario": "IQA-020",
+  "phase": 2,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "存在可检查的失败响应",
+      "passed": true,
+      "observation": "3 个失败响应",
+      "kind": null
+    },
+    {
+      "step": "IQA-011 无效令牌 X 失败响应不含令牌",
+      "passed": true,
+      "observation": "命中令牌代号: []",
+      "kind": null
+    },
+    {
+      "step": "IQA-012 无效令牌 X 失败响应不含令牌",
+      "passed": true,
+      "observation": "命中令牌代号: []",
+      "kind": null
+    },
+    {
+      "step": "IQA-021 I2 查询 失败响应不含令牌",
+      "passed": true,
+      "observation": "命中令牌代号: []",
+      "kind": null
+    }
+  ],
+  "requests": []
+}

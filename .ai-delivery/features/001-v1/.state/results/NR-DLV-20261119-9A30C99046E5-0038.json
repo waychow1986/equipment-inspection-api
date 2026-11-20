@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S38",
+  "result": "done",
+  "summary": "首次审查第 2 批（S37：按设备查询接口、仓储 listByDevice、查询参数校验、OpenAPI 查询操作、README 与单元/集成/功能测试）：未发现阻断问题；实现与技术方案 TD-006/TD-008/TD-012/TD-014 及查询契约一致，AC-02～AC-05、AC-07、AC-08 有真实 PostgreSQL 与真实进程的测试覆盖，未发现修改或放宽既有测试；记录 1 条非阻断观察项。",
+  "asks": [],
+  "outputs": [
+    ".ai-delivery/features/001-v1/.state/results/NR-DLV-20261119-9A30C99046E5-0038.json"
+  ],
+  "review": {
+    "mode": "code-review",
+    "conclusion": "通过（无阻断问题）。GET /v1/inspection-records 通过 allowedRole: 'manager' 复用第 1 批 onRequest 认证钩子，判定顺序 401→403→400 在校验与查库之前（inspector 查询 403，符合 Q2 已确认的最小权限；Q4 不按门店过滤）。validateDeviceQuery 与提交共用去首尾空白规则，重复参数 MULTIPLE_VALUES、超长 TOO_LONG、缺少/空白 REQUIRED，其他查询参数忽略，与契约一致。仓储 listByDevice 使用参数化、精确匹配的 SELECT … WHERE device_id = $1 ORDER BY submitted_at DESC, seq DESC，有对应复合索引，只读、无事务状态，写入角色已具备 SELECT 授权；无记录返回 200 空列表（AC-05），按设备隔离（AC-04），追加不覆盖（AC-03）。访问日志只记录路由模板，不含查询串；数据库错误经错误摘要只输出 errName/errCode（AC-08）。测试改动只新增用例：单元覆盖 200/401/403/400/503 与日志不含查询串，集成在真实 PostgreSQL 上覆盖排序、同刻并列、隔离、空列表、精确匹配，功能测试覆盖 IQA-001～007、009～018、020、021、FR-028、OpenAPI 发现查询入口及多次重启后的全部日志零命中（含 deviceId 查询串）；被删除的两行仅为 import 扩展，无断言被放宽。已锁定的 tasks-qa.md、qa-run.sh 未被本批修改；未发现凭据。镜像构建未在本地验证属下游证据，不构成问题。",
+    "items": [],
+    "findings": [
+      {
+        "ownerStep": "S37",
+        "text": "【观察·输入校验】src/inspections/validation.ts:66-72 validateDeviceQuery 与第 1 批相同（S36 观察项二，同一根因），未拒绝含 NUL 的 deviceId：请求 GET /v1/inspection-records?deviceId=A%00B 通过校验，PostgreSQL 在绑定 text 参数时拒绝（SQLSTATE 22021），经 app.ts 错误处理器返回 500 INTERNAL_ERROR 并记一条只含 errName/errCode 的 error 日志。不泄露内容、不影响数据，仅管理人员可触发，不属于已批准场景，不阻断；建议在 requiredString 中统一把含 NUL（或控制字符）的取值判为 INVALID_VALUE，一并修复提交与查询两处。",
+        "blocking": false
+      }
+    ]
+  }
+}

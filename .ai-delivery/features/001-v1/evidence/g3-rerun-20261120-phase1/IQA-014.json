@@ -1,0 +1,64 @@
+{
+  "scenario": "IQA-014",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "I1 提交 D13 被接受",
+      "passed": true,
+      "observation": "HTTP 201 {\"recordId\":\"42558218-8b80-499e-bc1b-c1f1b01f6047\",\"deviceId\":\"qajusv0ymx-D13\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R13-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:42.452Z\"}",
+      "kind": null
+    },
+    {
+      "step": "巡检员为 I1 的持有人标识",
+      "passed": true,
+      "observation": "巡检员=<I1-HOLDER> 期望持有人=<I1-HOLDER>",
+      "kind": null
+    },
+    {
+      "step": "提交与查询响应（头与正文）不含令牌 I1、M1",
+      "passed": true,
+      "observation": "命中令牌代号: []",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-20T02:38:42.455791+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qajusv0ymx-D13\", \"storeId\": \"qajusv0ymx-S1\", \"conclusion\": \"NORMAL\", \"note\": \"qajusv0ymx-R13-备注\"}",
+      "status": 201,
+      "responseHeaders": {
+        "x-request-id": "52596715-16d3-4bb9-9191-8156bb35fcae",
+        "location": "/v1/inspection-records?deviceId=qajusv0ymx-D13",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "230",
+        "date": "Fri, 20 Nov 2026 02:38:42 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"recordId\":\"42558218-8b80-499e-bc1b-c1f1b01f6047\",\"deviceId\":\"qajusv0ymx-D13\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R13-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:42.452Z\"}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T02:38:42.480175+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qajusv0ymx-D13",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "c4f91568-2736-4337-984c-fb68b9dc2c6a",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "272",
+        "date": "Fri, 20 Nov 2026 02:38:42 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qajusv0ymx-D13\",\"records\":[{\"recordId\":\"42558218-8b80-499e-bc1b-c1f1b01f6047\",\"deviceId\":\"qajusv0ymx-D13\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R13-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:42.452Z\"}]}",
+      "error": null
+    }
+  ]
+}

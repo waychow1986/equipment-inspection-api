@@ -1,0 +1,144 @@
+{
+  "scenario": "IQA-010",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "缺少门店：被拒绝为输入不符合要求",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"storeId\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "缺少门店：指明门店标识",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"storeId\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "门店为空串：被拒绝为输入不符合要求",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"storeId\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "门店为空串：指明门店标识",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"storeId\",\"reason\":\"REQUIRED\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "结论为“良好”：被拒绝为输入不符合要求",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"conclusion\",\"reason\":\"INVALID_VALUE\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "结论为“良好”：指明巡检结论",
+      "passed": true,
+      "observation": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"conclusion\",\"reason\":\"INVALID_VALUE\"}]}}",
+      "kind": null
+    },
+    {
+      "step": "M1 查询 D10 为空",
+      "passed": true,
+      "observation": "M1 查询 qajusv0ymx-D10: HTTP 200; 记录数=0",
+      "kind": null
+    },
+    {
+      "step": "M1 查询 D11 为空",
+      "passed": true,
+      "observation": "M1 查询 qajusv0ymx-D11: HTTP 200; 记录数=0",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-20T02:38:41.982104+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qajusv0ymx-D10\", \"conclusion\": \"NORMAL\", \"note\": \"qajusv0ymx-R10-备注\"}",
+      "status": 400,
+      "responseHeaders": {
+        "x-request-id": "27a5d7cc-4e44-49d4-9612-15e32fb385bf",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "123",
+        "date": "Fri, 20 Nov 2026 02:38:41 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"storeId\",\"reason\":\"REQUIRED\"}]}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T02:38:42.052751+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qajusv0ymx-D10\", \"storeId\": \"\", \"conclusion\": \"NORMAL\", \"note\": \"qajusv0ymx-R10-备注\"}",
+      "status": 400,
+      "responseHeaders": {
+        "x-request-id": "311715ff-3797-430e-b4ad-9cc454972705",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "123",
+        "date": "Fri, 20 Nov 2026 02:38:42 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"storeId\",\"reason\":\"REQUIRED\"}]}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T02:38:42.073261+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qajusv0ymx-D11\", \"storeId\": \"qajusv0ymx-S1\", \"conclusion\": \"良好\", \"note\": \"qajusv0ymx-R11-备注\"}",
+      "status": 400,
+      "responseHeaders": {
+        "x-request-id": "322bfb9f-8e69-428e-9165-d3b968624454",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "131",
+        "date": "Fri, 20 Nov 2026 02:38:42 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"VALIDATION_FAILED\",\"message\":\"输入不符合要求\",\"fields\":[{\"field\":\"conclusion\",\"reason\":\"INVALID_VALUE\"}]}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T02:38:42.119264+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qajusv0ymx-D10",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "44f2237e-a6e5-4e7c-80e7-90110398c9c8",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "42",
+        "date": "Fri, 20 Nov 2026 02:38:42 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qajusv0ymx-D10\",\"records\":[]}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T02:38:42.158197+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qajusv0ymx-D11",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "97640b6d-18b4-4061-ab82-1d28f53ea08d",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "42",
+        "date": "Fri, 20 Nov 2026 02:38:42 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qajusv0ymx-D11\",\"records\":[]}",
+      "error": null
+    }
+  ]
+}

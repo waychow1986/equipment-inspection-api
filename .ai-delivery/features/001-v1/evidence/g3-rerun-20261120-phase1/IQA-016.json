@@ -1,0 +1,81 @@
+{
+  "scenario": "IQA-016",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "前置：I1 提交 D15（门店 S2）被接受",
+      "passed": true,
+      "observation": "HTTP 201 {\"recordId\":\"d3db3bb3-3207-4ba4-83d3-51ab094f3366\",\"deviceId\":\"qajusv0ymx-D15\",\"storeId\":\"qajusv0ymx-S2\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R15-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:42.562Z\"}",
+      "kind": null
+    },
+    {
+      "step": "查询门店 S1 的 D1 成功并返回其记录",
+      "passed": true,
+      "observation": "HTTP 200 {\"deviceId\":\"qajusv0ymx-D1\",\"records\":[{\"recordId\":\"46f133f5-8ad3-4c32-bcf1-0e4201e880b9\",\"deviceId\":\"qajusv0ymx-D1\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qajusv0ymx-R1-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:37.569Z\"}]}",
+      "kind": null
+    },
+    {
+      "step": "查询门店 S2 的 D15 成功且恰好 1 条门店为 S2",
+      "passed": true,
+      "observation": "HTTP 200 {\"deviceId\":\"qajusv0ymx-D15\",\"records\":[{\"recordId\":\"d3db3bb3-3207-4ba4-83d3-51ab094f3366\",\"deviceId\":\"qajusv0ymx-D15\",\"storeId\":\"qajusv0ymx-S2\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R15-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:42.562Z\"}]}",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-20T02:38:42.565034+00:00",
+      "caller": "I1",
+      "method": "POST",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records",
+      "requestBody": "{\"deviceId\": \"qajusv0ymx-D15\", \"storeId\": \"qajusv0ymx-S2\", \"conclusion\": \"NORMAL\", \"note\": \"qajusv0ymx-R15-备注\"}",
+      "status": 201,
+      "responseHeaders": {
+        "x-request-id": "4da6c0ce-34af-479b-bf02-fff4066b0ecb",
+        "location": "/v1/inspection-records?deviceId=qajusv0ymx-D15",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "230",
+        "date": "Fri, 20 Nov 2026 02:38:42 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"recordId\":\"d3db3bb3-3207-4ba4-83d3-51ab094f3366\",\"deviceId\":\"qajusv0ymx-D15\",\"storeId\":\"qajusv0ymx-S2\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R15-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:42.562Z\"}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T02:38:42.589370+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qajusv0ymx-D1",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "5d0dad74-698d-467f-931d-efe640a72beb",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "271",
+        "date": "Fri, 20 Nov 2026 02:38:42 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qajusv0ymx-D1\",\"records\":[{\"recordId\":\"46f133f5-8ad3-4c32-bcf1-0e4201e880b9\",\"deviceId\":\"qajusv0ymx-D1\",\"storeId\":\"qajusv0ymx-S1\",\"conclusion\":\"ABNORMAL\",\"note\":\"qajusv0ymx-R1-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:37.569Z\"}]}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T02:38:42.634718+00:00",
+      "caller": "M1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qajusv0ymx-D15",
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "x-request-id": "e1f26990-37c6-421f-b6cc-b1f134905031",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "272",
+        "date": "Fri, 20 Nov 2026 02:38:42 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"deviceId\":\"qajusv0ymx-D15\",\"records\":[{\"recordId\":\"d3db3bb3-3207-4ba4-83d3-51ab094f3366\",\"deviceId\":\"qajusv0ymx-D15\",\"storeId\":\"qajusv0ymx-S2\",\"conclusion\":\"NORMAL\",\"note\":\"qajusv0ymx-R15-备注\",\"inspectorId\":\"<I1-HOLDER>\",\"submittedAt\":\"2026-11-20T02:38:42.562Z\"}]}",
+      "error": null
+    }
+  ]
+}

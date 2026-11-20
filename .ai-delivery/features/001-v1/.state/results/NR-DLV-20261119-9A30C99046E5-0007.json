@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S4",
+  "result": "needs-answer",
+  "summary": "按 PQ-003 的人工答案（本服务按运维机密配置中的访问令牌识别调用者与角色，删除令牌并重新加载即收回，不做账号管理接口）修订了产品规格的参与者与权限、领域术语、身份与权限需求（新增 FR-027～FR-029）、日志与回显要求、验收场景（改写 IQA-011/012/014/019/020，新增 IQA-021）与覆盖表；管理人员能否提交（PQ-004）仍待业务负责人决定。",
+  "asks": [
+    {
+      "kind": "decide",
+      "category": "business",
+      "question": "PQ-004：管理人员能否提交巡检结果？Q2 的答案为“巡检员只能提交，管理人员能查询历史记录”，未说明持管理人员令牌的调用者能否提交（影响 FR-019、IQA-015）。",
+      "recommended": "不能；只有巡检员令牌能提交（符合宪章 least privilege）；同一人如需两种能力，由运维分别为其提供巡检员令牌和管理人员令牌。",
+      "alternatives": [
+        "能；管理人员也可以提交，记录中的巡检员为该管理人员的持有人标识。"
+      ]
+    }
+  ],
+  "outputs": [
+    ".ai-delivery/features/001-v1/spec.md",
+    ".ai-delivery/features/001-v1/.state/results/NR-DLV-20261119-9A30C99046E5-0007.json"
+  ]
+}

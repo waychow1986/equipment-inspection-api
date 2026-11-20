@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "stepId": "S6",
+  "result": "done",
+  "summary": "按已完成的规格与技术方案细化计划：设计区无需再做，实施区分两批编码（第 1 批服务骨架、令牌身份、持久化与提交，验证 AC-01/AC-06/AC-08；第 2 批按设备查询与重启持久，验证 AC-02～AC-05/AC-07），每批后接代码审查，维持标准档；因规格问答多用了会话，建议把会话预算调到 22、时长 8 小时，并把令牌登记表方案、IQA-019 取日志途径两项交技术负责人在 G2 确认。",
+  "asks": [],
+  "outputs": [
+    ".ai-delivery/features/001-v1/.state/results/NR-DLV-20261119-9A30C99046E5-0012.json"
+  ],
+  "plan": {
+    "schemaVersion": 1,
+    "steps": [
+      {
+        "id": "S8",
+        "capability": "code",
+        "zone": "build",
+        "dependsOn": [],
+        "batch": 1
+      },
+      {
+        "id": "S9",
+        "capability": "review",
+        "zone": "build",
+        "dependsOn": [
+          "S8"
+        ],
+        "batch": 1
+      },
+      {
+        "id": "S10",
+        "capability": "code",
+        "zone": "build",
+        "dependsOn": [
+          "S9"
+        ],
+        "batch": 2
+      },
+      {
+        "id": "S11",
+        "capability": "review",
+        "zone": "build",
+        "dependsOn": [
+          "S10"
+        ],
+        "batch": 2
+      }
+    ],
+    "omitted": [
+      {
+        "capability": "spec",
+        "reason": "规格 spec.md 已完成，PQ-001～PQ-004 均有人工答案，AC-01～AC-08 都有验收场景覆盖，无需重做。"
+      },
+      {
+        "capability": "solution",
+        "reason": "技术方案 design.md 及依赖声明、部署声明已产出并通过确定性检查，开放决策无阻塞项，无需重做。"
+      },
+      {
+        "capability": "plan",
+        "reason": "本次即技术方案之后的细化计划，实施区已拆到可直接编码的粒度，不再安排计划步骤。"
+      }
+    ],
+    "batches": [
+      {
+        "n": 1,
+        "criteria": [
+          "AC-01",
+          "AC-06",
+          "AC-08"
+        ]
+      },
+      {
+        "n": 2,
+        "criteria": [
+          "AC-02",
+          "AC-03",
+          "AC-04",
+          "AC-05",
+          "AC-07"
+        ]
+      }
+    ],
+    "factors": [
+      {
+        "name": "change-size",
+        "lean": "light",
+        "basis": "只有两条业务接口（POST/GET /v1/inspection-records）加健康检查与运维令牌 CLI，29 条功能需求但逻辑简单，无前端、无报表、无修改删除。"
+      },
+      {
+        "name": "modules",
+        "lean": "medium",
+        "basis": "单个服务内的配置、日志白名单、数据库与迁移、令牌身份与角色、提交与查询路由、CLI 六个模块，外加 1 个外部依赖 inspection-db。"
+      },
+      {
+        "name": "new-or-first",
+        "lean": "heavy",
+        "basis": "全新项目，第一批编码要从零建立工程骨架、Dockerfile、开发者验证命令（runtime/deployment.json）与测试支撑。"
+      },
+      {
+        "name": "risk",
+        "lean": "medium",
+        "basis": "无数据迁移（新库，只有向前迁移 001_initial）；但有令牌摘要存储、最小权限、日志中不得出现凭据与记录内容（AC-08）、记录只增不改的触发器等安全与完整性要求，需要逐批审查。"
+      }
+    ],
+    "tier": "standard",
+    "budget": {
+      "revisions": 4,
+      "sessions": 22,
+      "hours": 8.0
+    },
+    "items": [
+      {
+        "category": "technical",
+        "question": "确认技术方案 TD-004：运维机密配置中的“令牌—持有人—角色”对应关系落地为数据库中的令牌登记表（只存 SHA-256 摘要，运维用镜像内 token-admin CLI 维护，删除即对下一次请求生效）。这是第 1 批编码的基础；若改为应用机密 + 重新部署，IQA-021 无法在一次独立测试运行中执行，需要修订测试安排与第 1 批范围。",
+        "recommended": "采用令牌登记表方案（TD-004），在 G2 确认设计时一并确认。",
+        "alternatives": [
+          "令牌清单作为应用机密注入，修改后重新部署才生效（IQA-021 需改为人工跨运行验证或记为测试缺口）。",
+          "使用云密钥服务（如 Azure Key Vault）并定时重载（增加云依赖与 IaC，超出当前预算）。"
+        ]
+      },
+      {
+        "category": "technical",
+        "question": "IQA-019（AC-08 日志零命中）需要取得候选服务在独立测试期间的全部日志，平台参考未写明取得方式（技术方案 OD-1）。若独立测试取不到日志，如何对待？",
+        "recommended": "第 1 批的功能测试在开发者侧对真实服务进程的完整输出做零命中检查作为补充证据；独立测试取不到日志时如实记为测试缺口，由 G4 的人判断是否接受。",
+        "alternatives": [
+          "由平台或运维在独立测试结束后导出候选服务日志并交给独立测试检索（需要平台支持）。"
+        ]
+      },
+      {
+        "category": "technical",
+        "question": "inspection-db 的形态：技术方案建议由平台以容器运行 postgres:16-alpine 并挂 2Gi 持久卷（dev/test 均为真实实例）；生产是否改用客户提供的托管 PostgreSQL？此事不影响本交付的编码批次，但影响依赖与机密任务的准备。",
+        "recommended": "本交付 dev/test 使用平台容器形态；生产形态在发布前的依赖与机密任务中由技术负责人另行决定。",
+        "alternatives": [
+          "现在就改为客户提供的托管 PostgreSQL（需提供 dev/test 实例连接信息，sslmode 设为 require 或 verify-full）。"
+        ]
+      },
+      {
+        "category": "business",
+        "question": "规格阶段为 4 个产品问题逐一问答，已用掉约 11 次会话（原预算 14 次）。剩余 G2、测试计划、两批编码与审查、G3～G5 约需 9～11 次会话，是否批准把预算调整为 22 次会话、8 小时（修订次数仍为 4）？",
+        "recommended": "批准调整为 22 次会话、8 小时、4 次修订。",
+        "alternatives": [
+          "维持原预算 14 次会话、6 小时：只能合并为一批编码（降低逐批审查的安全把关），且没有退回重做的余量。"
+        ]
+      }
+    ],
+    "reason": "设计区已完成：规格覆盖 AC-01～AC-08 与 IQA-001～IQA-021，技术方案已确定技术栈（TypeScript/Node 22/Fastify + PostgreSQL）、接口契约、令牌登记表与日志白名单，并已有依赖与部署声明，因此本次只列实施区；S8 为剩余计划的首个步骤，在 G2 设计确认通过后开始，不再引用本计划步骤 S6。第 1 批（S8 编码、S9 审查）：建立工程骨架、config/logger（字段白名单）、pg 连接池与启动迁移（含记录表只增不改触发器）、令牌登记表与 Bearer 身份/角色钩子、token-admin CLI、POST /v1/inspection-records 与统一错误响应、/healthz、Dockerfile 与 runtime/deployment.json；验收 AC-01（提交后记录可在真实 dev 库中按返回的记录标识核对，并通过集成测试检查保存的字段）、AC-06（缺设备/门店/结论或结论非法时 400 且库中无新增记录）、AC-08（功能测试捕获进程完整输出做令牌与记录内容零命中，响应不回显令牌）；同时覆盖 FR-017/FR-019 的 401/403 拒绝。第 2 批（S10 编码、S11 审查）：在第 1 批合入后实现 GET /v1/inspection-records?deviceId=…（管理人员专用、按提交时间从新到旧、空列表、缺设备 400、巡检员 403），以及停止并重新启动服务进程后的持久化功能测试；验收 AC-02、AC-03、AC-04、AC-05、AC-07，并补齐 IQA-021 收回令牌后的查询验证。两批都用真实 dev PostgreSQL 做集成与功能测试，Mock 不作验收证据。维持标准档：改动规模小、模块集中在一个服务、无数据迁移，完整档的额外设计评审收益有限；但新项目首个交付且带安全与日志隐私要求，需要两批编码各自审查，不宜用只有一批编码的轻量档。预算调整的原因是规格阶段四轮人工问答多用了会话，详见 items。"
+  }
+}

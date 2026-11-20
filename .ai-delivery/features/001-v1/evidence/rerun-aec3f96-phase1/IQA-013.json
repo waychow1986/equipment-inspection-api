@@ -1,0 +1,69 @@
+{
+  "scenario": "IQA-013",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "I1 查询被拒绝为无权执行该操作(403)",
+      "passed": true,
+      "observation": "HTTP 403 {\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"无权执行该操作\"}}",
+      "kind": null
+    },
+    {
+      "step": "I1 响应不含 D1 记录内容",
+      "passed": true,
+      "observation": "HTTP 403 {\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"无权执行该操作\"}}",
+      "kind": null
+    },
+    {
+      "step": "I2 查询被拒绝为无权执行该操作(403)",
+      "passed": true,
+      "observation": "HTTP 403 {\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"无权执行该操作\"}}",
+      "kind": null
+    },
+    {
+      "step": "I2 响应不含 D1 记录内容",
+      "passed": true,
+      "observation": "HTTP 403 {\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"无权执行该操作\"}}",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-20T00:14:10.522269+00:00",
+      "caller": "I1",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qaskeg7hzo-D1",
+      "requestBody": null,
+      "status": 403,
+      "responseHeaders": {
+        "x-request-id": "70a4d22f-fe73-473f-bf70-d29e7a33e5d3",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "64",
+        "date": "Fri, 20 Nov 2026 00:14:10 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"无权执行该操作\"}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-20T00:14:10.536133+00:00",
+      "caller": "I2",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qaskeg7hzo-D1",
+      "requestBody": null,
+      "status": 403,
+      "responseHeaders": {
+        "x-request-id": "5e72c22b-ea6d-41e6-9d83-9e0243663fcd",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "64",
+        "date": "Fri, 20 Nov 2026 00:14:10 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"无权执行该操作\"}}",
+      "error": null
+    }
+  ]
+}

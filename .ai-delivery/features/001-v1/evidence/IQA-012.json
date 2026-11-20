@@ -1,0 +1,71 @@
+{
+  "scenario": "IQA-012",
+  "phase": 1,
+  "assumptions": [
+    "A-1..A-7: 接口路径/字段/状态码按测试计划 tasks-qa.md 第 3 节推定"
+  ],
+  "checkpoints": [
+    {
+      "step": "不带令牌 查询被拒绝为未识别身份(401)",
+      "passed": true,
+      "observation": "HTTP 401 {\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "kind": null
+    },
+    {
+      "step": "不带令牌 响应不含 D1 记录内容",
+      "passed": true,
+      "observation": "HTTP 401 {\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "kind": null
+    },
+    {
+      "step": "无效令牌 X 查询被拒绝为未识别身份(401)",
+      "passed": true,
+      "observation": "HTTP 401 {\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "kind": null
+    },
+    {
+      "step": "无效令牌 X 响应不含 D1 记录内容",
+      "passed": true,
+      "observation": "HTTP 401 {\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "kind": null
+    }
+  ],
+  "requests": [
+    {
+      "time": "2026-11-19T21:58:26.972204+00:00",
+      "caller": null,
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qa8atbmib5-D1",
+      "requestBody": null,
+      "status": 401,
+      "responseHeaders": {
+        "x-request-id": "70c5aa32-dc92-44ef-ac82-a9b279bb094a",
+        "www-authenticate": "Bearer",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "64",
+        "date": "Thu, 19 Nov 2026 21:58:26 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "error": null
+    },
+    {
+      "time": "2026-11-19T21:58:27.006265+00:00",
+      "caller": "X",
+      "method": "GET",
+      "url": "https://cand-9a30c99046e5.eastus2.cloudapp.azure.com/v1/inspection-records?deviceId=qa8atbmib5-D1",
+      "requestBody": null,
+      "status": 401,
+      "responseHeaders": {
+        "x-request-id": "a1ad45b2-0f03-4200-9141-0aefbcdb83ec",
+        "www-authenticate": "Bearer",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "64",
+        "date": "Thu, 19 Nov 2026 21:58:27 GMT",
+        "connection": "close"
+      },
+      "responseBody": "{\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"未识别身份\"}}",
+      "error": null
+    }
+  ]
+}
